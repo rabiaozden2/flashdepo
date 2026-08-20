@@ -16,9 +16,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/rabiaozden2/flashdepo/backend/internal/auth"
 	"github.com/rabiaozden2/flashdepo/backend/internal/handlers"
 	"github.com/rabiaozden2/flashdepo/backend/internal/middleware"
+	"github.com/rabiaozden2/flashdepo/backend/internal/models"
 )
 
 func main() {
@@ -36,13 +39,71 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	// Auto Migration
+	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";")
+	if err := db.AutoMigrate(&models.User{}, &models.Warehouse{}, &models.Product{}, &models.Campaign{}, &models.Order{}); err != nil {
+		log.Printf("AutoMigrate warning: %v", err)
+	}
+
 	redisURL := os.Getenv("REDIS_URL")
 	if redisURL == "" {
 		redisURL = "localhost:6379"
 	}
-	rdb := redis.NewClient(&redis.Options{
-		Addr: redisURL,
-	})
+
+	var rdb *redis.Client
+	if opt, err := redis.ParseURL(redisURL); err == nil {
+		rdb = redis.NewClient(opt)
+	} else {
+		rdb = redis.NewClient(&redis.Options{Addr: redisURL})
+	}
+
+	// Auto Seed if empty
+	var warehouseCount int64
+	db.Model(&models.Warehouse{}).Count(&warehouseCount)
+	if warehouseCount == 0 {
+		log.Println("Database is empty. Seeding initial data...")
+		ctx := context.Background()
+
+		hashPassword := func(password string) string {
+			hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+			return string(hash)
+		}
+
+		admin := models.User{Email: "admin@flashdepo.com", PasswordHash: hashPassword("admin123"), Role: "admin", IsActive: true}
+		manager1 := models.User{Email: "manager1@flashdepo.com", PasswordHash: hashPassword("manager123"), Role: "warehouse_manager", IsActive: true}
+		customer := models.User{Email: "customer@flashdepo.com", PasswordHash: hashPassword("customer123"), Role: "customer", IsActive: true}
+
+		db.Create(&admin)
+		db.Create(&manager1)
+		db.Create(&customer)
+
+		w1 := models.Warehouse{Name: "İstanbul Ana Depo", ManagerID: &manager1.ID, IsActive: true}
+		w2 := models.Warehouse{Name: "Ankara Lojistik Deposu", ManagerID: &manager1.ID, IsActive: true}
+		db.Create(&w1)
+		db.Create(&w2)
+
+		p1 := models.Product{WarehouseID: w1.ID, Name: "iPhone 15 Pro Max 256GB", Description: "Titanyum kasa, A17 Pro çip", OriginalPrice: 75000, Stock: 50, ImageURL: "https://cdn.dummyjson.com/products/images/smartphones/iPhone%205s/thumbnail.png"}
+		p2 := models.Product{WarehouseID: w2.ID, Name: "MacBook Air M3", Description: "13.6 inç Liquid Retina ekran", OriginalPrice: 45000, Stock: 30, ImageURL: "https://cdn.dummyjson.com/products/images/laptops/Apple%20MacBook%20Pro%2014%20Inch%20Space%20Grey/thumbnail.png"}
+		p3 := models.Product{WarehouseID: w1.ID, Name: "AirPods Pro (2. Nesil)", Description: "Aktif Gürültü Engelleme", OriginalPrice: 8500, Stock: 100, ImageURL: "https://cdn.dummyjson.com/products/images/mobile-accessories/Apple%20AirPods%20Max%20Silver/thumbnail.png"}
+		db.Create(&p1)
+		db.Create(&p2)
+		db.Create(&p3)
+
+		now := time.Now()
+		c1 := models.Campaign{ProductID: p1.ID, CampaignStock: 10, DiscountPercentage: 25, StartTime: now, EndTime: now.Add(48 * time.Hour), IsActive: true}
+		c2 := models.Campaign{ProductID: p2.ID, CampaignStock: 5, DiscountPercentage: 20, StartTime: now, EndTime: now.Add(24 * time.Hour), IsActive: true}
+		c3 := models.Campaign{ProductID: p3.ID, CampaignStock: 20, DiscountPercentage: 30, StartTime: now.Add(2 * time.Hour), EndTime: now.Add(72 * time.Hour), IsActive: true}
+
+		db.Create(&c1)
+		db.Create(&c2)
+		db.Create(&c3)
+
+		rdb.Set(ctx, "stock:"+p1.ID.String(), p1.Stock, 0)
+		rdb.Set(ctx, "stock:"+p2.ID.String(), p2.Stock, 0)
+		rdb.Set(ctx, "stock:"+p3.ID.String(), p3.Stock, 0)
+
+		log.Println("Seeding completed successfully!")
+	}
 
 	r := gin.Default()
 
