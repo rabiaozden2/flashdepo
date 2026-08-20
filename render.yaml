@@ -1,13 +1,14 @@
-services:
-  # Database
-  - type: psql
-    name: flashdepo-postgres
+databases:
+  - name: flashdepo-postgres
+    databaseName: flashdepo
+    user: flashdepo
     plan: free
-    postgresMajorVersion: 15
 
+services:
   # Redis
   - type: redis
     name: flashdepo-redis
+    ipAllowList: []
     plan: free
 
   # API Server
@@ -65,3 +66,4 @@ services:
           type: redis
           name: flashdepo-redis
           property: connectionString
+
