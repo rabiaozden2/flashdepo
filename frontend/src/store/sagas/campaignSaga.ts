@@ -3,7 +3,7 @@ import { fetchCampaignsStart, fetchCampaignsSuccess, fetchCampaignsFailure, Camp
 
 function* fetchCampaignsSaga(): Generator<any, void, any> {
     try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
         const response = yield call(fetch, `${API_URL}/api/campaigns`);
         if (!response.ok) {
             throw new Error('Network response was not ok');

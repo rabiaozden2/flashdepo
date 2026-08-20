@@ -20,7 +20,7 @@ export default function OrdersPage() {
 
     const fetchOrders = async () => {
       try {
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
         const res = await fetch(`${API_URL}/api/orders`, {
           headers: { Authorization: `Bearer ${token}` }
         });

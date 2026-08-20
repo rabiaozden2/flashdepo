@@ -10,7 +10,7 @@ import {
 
 function* loginSaga(action: ReturnType<typeof loginStart>): Generator<any, void, any> {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
     const response = yield call(fetch, `${API_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -34,7 +34,7 @@ function* loginSaga(action: ReturnType<typeof loginStart>): Generator<any, void,
 
 function* registerSaga(action: ReturnType<typeof registerStart>): Generator<any, void, any> {
   try {
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
     const response = yield call(fetch, `${API_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

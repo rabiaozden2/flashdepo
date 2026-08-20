@@ -47,7 +47,7 @@ export default function Home() {
   const [cartSuccessId, setCartSuccessId] = useState<string | null>(null);
   const [products, setProducts] = useState<any[]>([]);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
 
   const fetchProducts = async () => {
     try {
@@ -81,7 +81,7 @@ export default function Home() {
     }
     setBuyingId(campaignId);
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
       const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: {

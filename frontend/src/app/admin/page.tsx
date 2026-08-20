@@ -30,7 +30,7 @@ export default function AdminPage() {
   const [prodStock, setProdStock] = useState('');
   const [prodImage, setProdImage] = useState('');
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
 
   useEffect(() => {
     if (!token || user?.role !== 'admin') {
