@@ -179,7 +179,10 @@ func (h *CampaignHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := h.DB.Delete(&models.Campaign{}, id).Error; err != nil {
+	// First delete any orders referencing this campaign to satisfy foreign key constraint
+	h.DB.Where("campaign_id = ?", id).Delete(&models.Order{})
+
+	if err := h.DB.Where("id = ?", id).Delete(&models.Campaign{}).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete campaign"})
 		return
 	}
