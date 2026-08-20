@@ -85,22 +85,33 @@ func main() {
 		p1 := models.Product{WarehouseID: w1.ID, Name: "iPhone 15 Pro Max 256GB", Description: "Titanyum kasa, A17 Pro çip", OriginalPrice: 75000, Stock: 50, ImageURL: "https://cdn.dummyjson.com/products/images/smartphones/iPhone%205s/thumbnail.png"}
 		p2 := models.Product{WarehouseID: w2.ID, Name: "MacBook Air M3", Description: "13.6 inç Liquid Retina ekran", OriginalPrice: 45000, Stock: 30, ImageURL: "https://cdn.dummyjson.com/products/images/laptops/Apple%20MacBook%20Pro%2014%20Inch%20Space%20Grey/thumbnail.png"}
 		p3 := models.Product{WarehouseID: w1.ID, Name: "AirPods Pro (2. Nesil)", Description: "Aktif Gürültü Engelleme", OriginalPrice: 8500, Stock: 100, ImageURL: "https://cdn.dummyjson.com/products/images/mobile-accessories/Apple%20AirPods%20Max%20Silver/thumbnail.png"}
+		p4 := models.Product{WarehouseID: w1.ID, Name: "PlayStation 5 Slim 1TB", Description: "Ultra yüksek hızlı SSD", OriginalPrice: 24999, Stock: 45, ImageURL: "https://cdn.dummyjson.com/products/images/mobile-accessories/Apple%20AirPods%20Max%20Silver/thumbnail.png"}
+		p5 := models.Product{WarehouseID: w2.ID, Name: "Samsung Galaxy S24 Ultra", Description: "Galaxy AI teknolojisi", OriginalPrice: 64999, Stock: 30, ImageURL: "https://cdn.dummyjson.com/products/images/smartphones/iPhone%20X/thumbnail.png"}
+
 		db.Create(&p1)
 		db.Create(&p2)
 		db.Create(&p3)
+		db.Create(&p4)
+		db.Create(&p5)
 
 		now := time.Now()
 		c1 := models.Campaign{ProductID: p1.ID, CampaignStock: 10, DiscountPercentage: 25, StartTime: now, EndTime: now.Add(48 * time.Hour), IsActive: true}
 		c2 := models.Campaign{ProductID: p2.ID, CampaignStock: 5, DiscountPercentage: 20, StartTime: now, EndTime: now.Add(24 * time.Hour), IsActive: true}
 		c3 := models.Campaign{ProductID: p3.ID, CampaignStock: 20, DiscountPercentage: 30, StartTime: now.Add(2 * time.Hour), EndTime: now.Add(72 * time.Hour), IsActive: true}
+		c4 := models.Campaign{ProductID: p4.ID, CampaignStock: 15, DiscountPercentage: 15, StartTime: now, EndTime: now.Add(96 * time.Hour), IsActive: true}
+		c5 := models.Campaign{ProductID: p5.ID, CampaignStock: 8, DiscountPercentage: 20, StartTime: now, EndTime: now.Add(120 * time.Hour), IsActive: true}
 
 		db.Create(&c1)
 		db.Create(&c2)
 		db.Create(&c3)
+		db.Create(&c4)
+		db.Create(&c5)
 
 		rdb.Set(ctx, "stock:"+p1.ID.String(), p1.Stock, 0)
 		rdb.Set(ctx, "stock:"+p2.ID.String(), p2.Stock, 0)
 		rdb.Set(ctx, "stock:"+p3.ID.String(), p3.Stock, 0)
+		rdb.Set(ctx, "stock:"+p4.ID.String(), p4.Stock, 0)
+		rdb.Set(ctx, "stock:"+p5.ID.String(), p5.Stock, 0)
 
 		log.Println("Seeding completed successfully!")
 	}
