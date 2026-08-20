@@ -1,0 +1,67 @@
+services:
+  # Database
+  - type: psql
+    name: flashdepo-postgres
+    plan: free
+    postgresMajorVersion: 15
+
+  # Redis
+  - type: redis
+    name: flashdepo-redis
+    plan: free
+
+  # API Server
+  - type: web
+    name: flashdepo-api
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile.api
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: flashdepo-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: flashdepo-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Order Worker
+  - type: worker
+    name: flashdepo-worker
+    env: docker
+    dockerContext: backend
+    dockerfilePath: backend/Dockerfile.worker
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: flashdepo-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: flashdepo-redis
+          property: connectionString
+
+  # Notification Worker
+  - type: worker
+    name: flashdepo-notification-worker
+    env: docker
+    dockerContext: notification-worker
+    dockerfilePath: notification-worker/Dockerfile
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: flashdepo-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: flashdepo-redis
+          property: connectionString

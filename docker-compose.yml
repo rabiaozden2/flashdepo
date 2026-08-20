@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: flashdepo
+    ports:
+      - "15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - flashdepo-net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - flashdepo-net
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+    environment:
+      - DATABASE_URL=postgres://root:secretpassword@postgres:5432/flashdepo?sslmode=disable
+      - REDIS_URL=redis:6379
+      - JWT_SECRET=supersecretkey
+    ports:
+      - "8080:8080"
+    deploy:
+      replicas: 1
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - flashdepo-net
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    environment:
+      - DATABASE_URL=postgres://root:secretpassword@postgres:5432/flashdepo?sslmode=disable
+      - REDIS_URL=redis:6379
+    deploy:
+      replicas: 2
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - flashdepo-net
+
+  notification-worker:
+    build:
+      context: ./notification-worker
+      dockerfile: Dockerfile
+    environment:
+      - DATABASE_URL=postgres://root:secretpassword@postgres:5432/flashdepo?sslmode=disable
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    deploy:
+      replicas: 2
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - flashdepo-net
+
+  autoscaler:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.autoscaler
+    environment:
+      - REDIS_URL=redis:6379
+      - MIN_WORKERS=2
+      - MAX_WORKERS=4
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - flashdepo-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - flashdepo-net
+
+networks:
+  flashdepo-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
