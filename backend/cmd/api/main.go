@@ -82,11 +82,11 @@ func main() {
 		db.Create(&w1)
 		db.Create(&w2)
 
-		p1 := models.Product{WarehouseID: w1.ID, Name: "iPhone 15 Pro Max 256GB", Description: "Titanyum kasa, A17 Pro çip", OriginalPrice: 75000, Stock: 50, ImageURL: "https://cdn.dummyjson.com/products/images/smartphones/iPhone%205s/thumbnail.png"}
-		p2 := models.Product{WarehouseID: w2.ID, Name: "MacBook Air M3", Description: "13.6 inç Liquid Retina ekran", OriginalPrice: 45000, Stock: 30, ImageURL: "https://cdn.dummyjson.com/products/images/laptops/Apple%20MacBook%20Pro%2014%20Inch%20Space%20Grey/thumbnail.png"}
-		p3 := models.Product{WarehouseID: w1.ID, Name: "AirPods Pro (2. Nesil)", Description: "Aktif Gürültü Engelleme", OriginalPrice: 8500, Stock: 100, ImageURL: "https://cdn.dummyjson.com/products/images/mobile-accessories/Apple%20AirPods%20Max%20Silver/thumbnail.png"}
-		p4 := models.Product{WarehouseID: w1.ID, Name: "PlayStation 5 Slim 1TB", Description: "Ultra yüksek hızlı SSD", OriginalPrice: 24999, Stock: 45, ImageURL: "https://cdn.dummyjson.com/products/images/mobile-accessories/Apple%20AirPods%20Max%20Silver/thumbnail.png"}
-		p5 := models.Product{WarehouseID: w2.ID, Name: "Samsung Galaxy S24 Ultra", Description: "Galaxy AI teknolojisi", OriginalPrice: 64999, Stock: 30, ImageURL: "https://cdn.dummyjson.com/products/images/smartphones/iPhone%20X/thumbnail.png"}
+		p1 := models.Product{WarehouseID: w1.ID, Name: "iPhone 15 Pro Max 256GB", Description: "Titanyum kasa, A17 Pro çip", OriginalPrice: 75000, Stock: 50, ImageURL: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=800&auto=format&fit=crop&q=80"}
+		p2 := models.Product{WarehouseID: w2.ID, Name: "MacBook Air M3", Description: "13.6 inç Liquid Retina ekran", OriginalPrice: 45000, Stock: 30, ImageURL: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800&auto=format&fit=crop&q=80"}
+		p3 := models.Product{WarehouseID: w1.ID, Name: "AirPods Pro (2. Nesil)", Description: "Aktif Gürültü Engelleme", OriginalPrice: 8500, Stock: 100, ImageURL: "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=800&auto=format&fit=crop&q=80"}
+		p4 := models.Product{WarehouseID: w1.ID, Name: "PlayStation 5 Slim 1TB", Description: "Ultra yüksek hızlı SSD", OriginalPrice: 24999, Stock: 45, ImageURL: "https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=800&auto=format&fit=crop&q=80"}
+		p5 := models.Product{WarehouseID: w2.ID, Name: "Samsung Galaxy S24 Ultra", Description: "Galaxy AI teknolojisi", OriginalPrice: 64999, Stock: 30, ImageURL: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=800&auto=format&fit=crop&q=80"}
 
 		db.Create(&p1)
 		db.Create(&p2)

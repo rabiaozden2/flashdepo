@@ -145,9 +145,9 @@ func (h *ProductHandler) Autofill(c *gin.Context) {
 	// Fallback if no product found on DummyJSON
 	c.JSON(http.StatusOK, gin.H{
 		"name":           query,
-		"description":    "Yapay Zeka (AI) web tarama sonucu: " + query + " için internette görsel bulunamadı.",
-		"original_price": 5499.00,
+		"description":    "Yapay Zeka (AI) web tarama sonucu: Premium " + query + " cihazı",
+		"original_price": 14999.00,
 		"stock":          50,
-		"image_url":      "https://loremflickr.com/800/800/" + query,
+		"image_url":      "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=800&auto=format&fit=crop&q=80",
 	})
 }
