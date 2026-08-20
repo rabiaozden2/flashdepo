@@ -166,6 +166,8 @@ func main() {
 	managerProducts := api.Group("/products")
 	managerProducts.Use(auth.RequireAuth())
 	managerProducts.POST("", productHandler.Create)
+	managerProducts.PUT("/:id", productHandler.Update)
+	managerProducts.DELETE("/:id", productHandler.Delete)
 
 	// Warehouses (public)
 	warehouseHandler := &handlers.WarehouseHandler{DB: db}

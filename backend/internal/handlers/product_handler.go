@@ -98,6 +98,38 @@ func (h *ProductHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, product)
 }
 
+func (h *ProductHandler) Update(c *gin.Context) {
+	id := c.Param("id")
+	var product models.Product
+	if err := h.DB.First(&product, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
+		return
+	}
+	var req CreateProductRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	product.Name = req.Name
+	product.Description = req.Description
+	product.OriginalPrice = req.OriginalPrice
+	product.Stock = req.Stock
+	if req.ImageURL != "" {
+		product.ImageURL = req.ImageURL
+	}
+	h.DB.Save(&product)
+	c.JSON(http.StatusOK, product)
+}
+
+func (h *ProductHandler) Delete(c *gin.Context) {
+	id := c.Param("id")
+	if err := h.DB.Delete(&models.Product{}, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete product"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "Product deleted"})
+}
+
 // Autofill simulates an AI that fetches product details from the web
 // @Router /products/autofill [get]
 func (h *ProductHandler) Autofill(c *gin.Context) {
