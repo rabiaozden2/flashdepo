@@ -184,9 +184,9 @@ func main() {
 	orderHandler := &handlers.OrderHandler{DB: db, Redis: rdb, Ws: wsHandler}
 	orders := api.Group("/orders")
 	orders.Use(auth.RequireAuth())
-	orders.GET("", orderHandler.List)                            // any authenticated user
-	orders.Use(auth.RequireRole("customer", "admin")).POST("", orderHandler.Create) // customer and admin
-	orders.Use(auth.RequireRole("customer", "admin")).POST("/bulk", orderHandler.BulkCreate) // bulk order
+	orders.GET("", orderHandler.List)
+	orders.POST("", orderHandler.Create)
+	orders.POST("/bulk", orderHandler.BulkCreate)
 
 	port := os.Getenv("PORT")
 	if port == "" {
