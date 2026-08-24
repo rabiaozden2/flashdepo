@@ -137,27 +137,40 @@ export default function Navbar() {
         <HStack gap={5}>
           {/* Cart Icon */}
           <Link href="/cart">
-            <Box position="relative" cursor="pointer" p={2} borderRadius="12px" _hover={{ bg: 'rgba(255,255,255,0.08)' }}>
-              <FiShoppingBag size={22} color="white" />
+            <Box
+              position="relative"
+              cursor="pointer"
+              p={2.5}
+              borderRadius="14px"
+              style={{
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                transition: 'all 0.2s ease',
+              }}
+              _hover={{ bg: 'rgba(255,255,255,0.12)' }}
+            >
+              <FiShoppingBag size={22} color="#ffffff" />
               {totalCartItems > 0 && (
                 <Box
                   position="absolute"
-                  top="-4px"
+                  top="-6px"
                   right="-6px"
                   style={{
-                    background: 'linear-gradient(135deg, #ec4899, #f97316)',
-                    color: 'white',
+                    background: '#ef4444',
+                    color: '#ffffff',
                     borderRadius: '999px',
-                    fontSize: '11px',
+                    fontSize: '12px',
                     fontWeight: '900',
-                    minWidth: '20px',
-                    height: '20px',
+                    minWidth: '22px',
+                    height: '22px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: '2px solid rgba(15,12,41,1)',
-                    boxShadow: '0 2px 8px rgba(236,72,153,0.6)',
-                    padding: '0 4px',
+                    border: '2px solid #ffffff',
+                    boxShadow: '0 4px 12px rgba(239,68,68,0.8)',
+                    padding: '0 5px',
+                    lineHeight: 1,
+                    zIndex: 10,
                   }}
                 >
                   {totalCartItems}
