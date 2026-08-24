@@ -5,6 +5,7 @@ import { Box, Container, Heading, VStack, HStack, Button, Input, Select, Text } 
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
+import { showToast } from '@/components/Toast';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -85,15 +86,15 @@ export default function AdminPage() {
         })
       });
       if (res.ok) {
-        alert('Kampanya başarıyla eklendi!');
+        showToast('Kampanya başarıyla eklendi!', 'success');
         setCampProductId(''); setCampDiscount(''); setCampStart(''); setCampEnd(''); setCampStock('');
         fetchCampaigns();
       } else {
         const err = await res.json();
-        alert('Hata: ' + err.error);
+        showToast('Hata: ' + err.error, 'error');
       }
     } catch (e) {
-      alert('Bağlantı hatası.');
+      showToast('Bağlantı hatası.', 'error');
     }
   };
 
@@ -104,8 +105,12 @@ export default function AdminPage() {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (res.ok) fetchCampaigns();
-      else alert('Silinemedi.');
+      if (res.ok) {
+        fetchCampaigns();
+        showToast('Kampanya silindi', 'info');
+      } else {
+        showToast('Silinemedi.', 'error');
+      }
     } catch (e) { console.error(e); }
   };
 
@@ -135,10 +140,10 @@ export default function AdminPage() {
         })
       });
       if (res.ok) {
-        alert('Kampanya yeniden başlatıldı!');
+        showToast('Kampanya yeniden başlatıldı!', 'success');
         fetchCampaigns();
       } else {
-        alert('Güncellenemedi.');
+        showToast('Güncellenemedi.', 'error');
       }
     } catch (e) { console.error(e); }
   };
@@ -161,7 +166,7 @@ export default function AdminPage() {
         })
       });
       if (res.ok) {
-        alert('Ürün başarıyla eklendi!');
+        showToast('Ürün başarıyla eklendi!', 'success');
         setProdWarehouseId(''); setProdName(''); setProdDesc(''); setProdPrice(''); setProdStock(''); setProdImage('');
         // Refresh products list for campaign tab
         const pRes = await fetch(`${API_URL}/api/products`);
@@ -169,17 +174,17 @@ export default function AdminPage() {
         if (pData && pData.data) setProducts(pData.data);
       } else {
         const err = await res.json();
-        alert('Hata: ' + err.error);
+        showToast('Hata: ' + err.error, 'error');
       }
     } catch (e) {
-      alert('Bağlantı hatası.');
+      showToast('Bağlantı hatası.', 'error');
     }
   };
 
   const [isAutoFilling, setIsAutoFilling] = useState(false);
   const handleAutoFill = async () => {
     if (!prodName) {
-      alert('Lütfen önce Ürün Adı kutusuna bir isim (örn: AirPods 3) yazın!');
+      showToast('Lütfen önce Ürün Adı kutusuna bir isim (örn: AirPods 3) yazın!', 'info');
       return;
     }
     setIsAutoFilling(true);
@@ -191,12 +196,13 @@ export default function AdminPage() {
         setProdPrice(data.original_price?.toString() || '');
         setProdStock(data.stock?.toString() || '');
         setProdImage(data.image_url || '');
+        showToast('Ürün bilgileri webden başarıyla çekildi!', 'success');
       } else {
-        alert('Otomatik doldurma başarısız oldu.');
+        showToast('Otomatik doldurma başarısız oldu.', 'error');
       }
     } catch (e) {
       console.error(e);
-      alert('Otomatik doldurma sırasında hata.');
+      showToast('Otomatik doldurma sırasında hata.', 'error');
     } finally {
       setIsAutoFilling(false);
     }

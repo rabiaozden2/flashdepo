@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Flex, Heading, Button, HStack, Text, Badge, Avatar } from '@chakra-ui/react';
+import { Box, Flex, Heading, Button, HStack, Text, Badge } from '@chakra-ui/react';
 import Link from 'next/link';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
@@ -8,6 +8,7 @@ import { logout, initializeAuth } from '@/store/slices/authSlice';
 import { clearCart } from '@/store/slices/cartSlice';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { FiShoppingBag, FiUser, FiLogOut, FiShield } from 'react-icons/fi';
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -136,26 +137,31 @@ export default function Navbar() {
         <HStack gap={5}>
           {/* Cart Icon */}
           <Link href="/cart">
-            <Box position="relative" cursor="pointer">
-              <Text fontSize="xl">🛒</Text>
+            <Box position="relative" cursor="pointer" p={2} borderRadius="12px" _hover={{ bg: 'rgba(255,255,255,0.08)' }}>
+              <FiShoppingBag size={22} color="white" />
               {totalCartItems > 0 && (
-                <Badge
+                <Box
                   position="absolute"
-                  top="-8px"
-                  right="-10px"
-                  bg="fuchsia.500"
-                  color="white"
-                  borderRadius="full"
-                  fontSize="0.7em"
-                  w="18px"
-                  h="18px"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  border="2px solid rgba(15,12,41,1)"
+                  top="-4px"
+                  right="-6px"
+                  style={{
+                    background: 'linear-gradient(135deg, #ec4899, #f97316)',
+                    color: 'white',
+                    borderRadius: '999px',
+                    fontSize: '11px',
+                    fontWeight: '900',
+                    minWidth: '20px',
+                    height: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '2px solid rgba(15,12,41,1)',
+                    boxShadow: '0 2px 8px rgba(236,72,153,0.6)',
+                    padding: '0 4px',
+                  }}
                 >
                   {totalCartItems}
-                </Badge>
+                </Box>
               )}
             </Box>
           </Link>
@@ -163,28 +169,66 @@ export default function Navbar() {
           {/* Auth section */}
           {token && user ? (
             <HStack gap={3}>
-              <HStack gap={2}>
-                <Box
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '13px',
-                    fontWeight: 'bold',
-                    color: 'white',
-                    boxShadow: '0 2px 10px rgba(124,58,237,0.4)',
-                  }}
+              <Link href="/profile" style={{ textDecoration: 'none' }}>
+                <HStack
+                  gap={2}
+                  cursor="pointer"
+                  p="4px 10px 4px 4px"
+                  borderRadius="999px"
+                  bg="rgba(255,255,255,0.05)"
+                  border="1px solid rgba(255,255,255,0.1)"
+                  _hover={{ bg: 'rgba(255,255,255,0.1)' }}
+                  style={{ transition: 'all 0.2s' }}
                 >
-                  {user.email.charAt(0).toUpperCase()}
-                </Box>
-                <Text color="whiteAlpha.800" fontSize="sm" fontWeight="500">
-                  {user.email.split('@')[0]}
-                </Text>
-              </HStack>
+                  <Box
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      color: 'white',
+                    }}
+                  >
+                    {user.email.charAt(0).toUpperCase()}
+                  </Box>
+                  <Text color="white" fontSize="sm" fontWeight="600">
+                    {user.email.split('@')[0]}
+                  </Text>
+                  <Badge
+                    fontSize="10px"
+                    fontWeight="800"
+                    px={2}
+                    py={0.5}
+                    borderRadius="full"
+                    style={{
+                      background: user.role === 'admin'
+                        ? 'rgba(236,72,153,0.2)'
+                        : user.role === 'warehouse_manager'
+                        ? 'rgba(6,182,212,0.2)'
+                        : 'rgba(16,185,129,0.2)',
+                      color: user.role === 'admin'
+                        ? '#f472b6'
+                        : user.role === 'warehouse_manager'
+                        ? '#38bdf8'
+                        : '#34d399',
+                      border: `1px solid ${
+                        user.role === 'admin'
+                          ? 'rgba(236,72,153,0.4)'
+                          : user.role === 'warehouse_manager'
+                          ? 'rgba(6,182,212,0.4)'
+                          : 'rgba(16,185,129,0.4)'
+                      }`,
+                    }}
+                  >
+                    {user.role === 'admin' ? '👑 Admin' : user.role === 'warehouse_manager' ? '🏢 Depo Yön.' : '🛍️ Müşteri'}
+                  </Badge>
+                </HStack>
+              </Link>
               <Button
                 size="sm"
                 onClick={handleLogout}
@@ -197,7 +241,7 @@ export default function Navbar() {
                   transition: 'all 0.2s',
                 }}
               >
-                Çıkış
+                <FiLogOut size={14} />
               </Button>
             </HStack>
           ) : (

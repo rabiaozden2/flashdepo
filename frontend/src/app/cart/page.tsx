@@ -6,6 +6,7 @@ import { RootState } from '@/store/store';
 import { updateQuantity, removeFromCart, clearCart } from '@/store/slices/cartSlice';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
 
 export default function CartPage() {
   const router = useRouter();
@@ -130,31 +131,54 @@ export default function CartPage() {
                       </Text>
                       <HStack gap={2}>
                         <Button
-                          size="xs"
-                          variant="outline"
+                          size="sm"
                           onClick={() => dispatch(updateQuantity({ campaignId: item.campaignId, quantity: item.quantity - 1 }))}
                           disabled={item.quantity <= 1}
+                          style={{
+                            background: 'rgba(255,255,255,0.08)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            color: 'white',
+                            minWidth: '32px',
+                            height: '32px',
+                            padding: 0,
+                            borderRadius: '8px',
+                          }}
                         >
-                          -
+                          <FiMinus size={14} color="white" />
                         </Button>
-                        <Text w="20px" textAlign="center">{item.quantity}</Text>
+                        <Text w="28px" textAlign="center" fontWeight="800" fontSize="16px" color="white">
+                          {item.quantity}
+                        </Text>
                         <Button
-                          size="xs"
-                          variant="outline"
+                          size="sm"
                           onClick={() => dispatch(updateQuantity({ campaignId: item.campaignId, quantity: item.quantity + 1 }))}
                           disabled={item.quantity >= item.stock}
+                          style={{
+                            background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
+                            border: 'none',
+                            color: 'white',
+                            minWidth: '32px',
+                            height: '32px',
+                            padding: 0,
+                            borderRadius: '8px',
+                            boxShadow: '0 2px 10px rgba(124,58,237,0.4)',
+                          }}
                         >
-                          +
+                          <FiPlus size={14} color="white" />
                         </Button>
                       </HStack>
                     </VStack>
                     <Button
                       size="sm"
-                      variant="ghost"
-                      color="red.400"
                       onClick={() => dispatch(removeFromCart(item.campaignId))}
+                      style={{
+                        background: 'rgba(239,68,68,0.12)',
+                        border: '1px solid rgba(239,68,68,0.3)',
+                        borderRadius: '10px',
+                        padding: '8px',
+                      }}
                     >
-                      🗑️
+                      <FiTrash2 size={16} color="#f87171" />
                     </Button>
                   </HStack>
                 </HStack>

@@ -4,6 +4,7 @@ import "./globals.css";
 import { StoreProvider } from "@/providers/StoreProvider";
 import { ChakraProvider } from "@/providers/ChakraProvider";
 import Navbar from "@/components/Navbar";
+import ToastContainer from "@/components/Toast";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], weight: ["300","400","500","600","700"] });
 
@@ -24,6 +25,7 @@ export default function RootLayout({
           <ChakraProvider>
             <Navbar />
             {children}
+            <ToastContainer />
           </ChakraProvider>
         </StoreProvider>
       </body>

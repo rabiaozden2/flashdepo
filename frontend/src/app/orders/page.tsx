@@ -105,7 +105,8 @@ export default function OrdersPage() {
         ) : (
           <SimpleGrid columns={{ base: 1 }} gap={6}>
             {orders.map(order => {
-              const product = order.Campaign?.Product;
+              const campaign = order.campaign || order.Campaign;
+              const product = campaign?.product || campaign?.Product || order.product;
               const date = new Date(order.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
               
               let statusColor = 'yellow.400';

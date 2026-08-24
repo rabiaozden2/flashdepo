@@ -8,6 +8,7 @@ import { addToCart } from '@/store/slices/cartSlice';
 import { Box, Container, Heading, SimpleGrid, Grid, Text, Button, Badge, VStack, HStack } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/CountdownTimer';
+import { showToast } from '@/components/Toast';
 
 const CARD_GRADIENTS = [
   'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.2))',
@@ -63,16 +64,21 @@ export default function Home() {
     dispatch(fetchCampaignsStart());
     fetchProducts();
 
-    const ws = new WebSocket('ws://localhost:8080/api/ws');
+    const WS_URL = API_URL.replace(/^http/, 'ws') + '/api/ws';
+    const ws = new WebSocket(WS_URL);
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'STOCK_UPDATE') {
-        dispatch(updateStock({ campaignId: data.campaignId, newStock: data.stock }));
-        fetchProducts(); // Refetch products to update inventory table
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'STOCK_UPDATE') {
+          dispatch(updateStock({ campaignId: data.campaignId, newStock: data.stock }));
+          fetchProducts(); // Refetch products to update inventory table
+        }
+      } catch (e) {
+        console.error(e);
       }
     };
     return () => ws.close();
-  }, [dispatch]);
+  }, [dispatch, API_URL]);
 
   const handleBuy = async (campaignId: string) => {
     if (!token) {
@@ -81,7 +87,6 @@ export default function Home() {
     }
     setBuyingId(campaignId);
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
       const res = await fetch(`${API_URL}/api/orders`, {
         method: 'POST',
         headers: {
@@ -93,12 +98,13 @@ export default function Home() {
       const data = await res.json();
       if (res.ok) {
         setSuccessId(campaignId);
+        showToast('Siparişiniz başarıyla alındı!', 'success');
         setTimeout(() => setSuccessId(null), 3000);
       } else {
-        alert('Hata: ' + (data.error || 'Sipariş oluşturulamadı'));
+        showToast(data.error || 'Sipariş oluşturulamadı', 'error');
       }
     } catch {
-      alert('Bağlantı hatası.');
+      showToast('Bağlantı hatası.', 'error');
     } finally {
       setBuyingId(null);
     }
@@ -114,7 +120,7 @@ export default function Home() {
       stock: camp.product.stock
     }));
     setCartSuccessId(camp.id);
-    setCartSuccessId(camp.id);
+    showToast(`${camp.product.name} sepete eklendi!`, 'success');
     setTimeout(() => setCartSuccessId(null), 2000);
   };
 
@@ -127,12 +133,13 @@ export default function Home() {
       });
       if (res.ok) {
         dispatch(fetchCampaignsStart());
+        showToast('Kampanya silindi', 'info');
       } else {
-        alert('Silinemedi.');
+        showToast('Silinemedi.', 'error');
       }
     } catch (e) {
       console.error(e);
-      alert('Bağlantı hatası.');
+      showToast('Bağlantı hatası.', 'error');
     }
   };
 

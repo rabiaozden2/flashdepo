@@ -9,8 +9,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('customer@flashdepo.com');
-  const [password, setPassword] = useState('customer123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [focused, setFocused] = useState<string | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -23,6 +23,11 @@ export default function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     dispatch(loginStart({ email, password }));
+  };
+
+  const fillDemoAccount = (demoEmail: string, demoPass: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPass);
   };
 
   const inputStyle = (name: string) => ({
@@ -166,6 +171,39 @@ export default function LoginPage() {
             {loading ? 'Giriş yapılıyor...' : '⚡ Giriş Yap'}
           </Button>
         </VStack>
+
+        {/* Quick Demo Fill Buttons */}
+        <Box mt={5} pt={4} borderTop="1px solid rgba(255,255,255,0.06)">
+          <Text fontSize="xs" color="whiteAlpha.400" mb={2} textAlign="center" fontWeight="500">
+            Hızlı Test İçin Örnek Hesaplar:
+          </Text>
+          <HStack gap={2} justify="center" flexWrap="wrap">
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() => fillDemoAccount('admin@flashdepo.com', 'admin123')}
+              style={{ background: 'rgba(236,72,153,0.1)', border: '1px solid rgba(236,72,153,0.3)', color: '#f472b6', borderRadius: '8px' }}
+            >
+              👑 Admin
+            </Button>
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() => fillDemoAccount('manager1@flashdepo.com', 'manager123')}
+              style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', color: '#38bdf8', borderRadius: '8px' }}
+            >
+              🏢 Depo Yöneticisi
+            </Button>
+            <Button
+              size="xs"
+              variant="outline"
+              onClick={() => fillDemoAccount('customer@flashdepo.com', 'customer123')}
+              style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399', borderRadius: '8px' }}
+            >
+              🛍️ Müşteri
+            </Button>
+          </HStack>
+        </Box>
 
         {/* Divider */}
         <HStack gap={3} my={6}>

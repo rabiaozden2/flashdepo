@@ -95,6 +95,9 @@ func (h *OrderHandler) Create(c *gin.Context) {
 		return
 	}
 
+	// Update DB campaign stock so REST queries reflect instant stock drop
+	h.DB.Model(&models.Campaign{}).Where("id = ?", campaign.ID).UpdateColumn("campaign_stock", remaining)
+
 	h.Ws.BroadcastMessage(map[string]interface{}{
 		"type":       "STOCK_UPDATE",
 		"campaignId": campaign.ID,
@@ -193,6 +196,9 @@ func (h *OrderHandler) BulkCreate(c *gin.Context) {
 			failed = append(failed, gin.H{"campaign_id": item.CampaignID, "error": "Out of stock"})
 			continue
 		}
+
+		// Update DB campaign stock so REST queries reflect instant stock drop
+		h.DB.Model(&models.Campaign{}).Where("id = ?", campaign.ID).UpdateColumn("campaign_stock", remaining)
 
 		h.Ws.BroadcastMessage(map[string]interface{}{
 			"type":       "STOCK_UPDATE",
