@@ -4,6 +4,8 @@ import { Box, Container, Heading, VStack, HStack, Text, Button, Badge } from '@c
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { updateQuantity, removeFromCart, clearCart } from '@/store/slices/cartSlice';
+import { logout } from '@/store/slices/authSlice';
+import { showToast } from '@/components/Toast';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
@@ -43,10 +45,18 @@ export default function CartPage() {
         body: JSON.stringify({ items: orderItems }),
       });
       const data = await res.json();
+      if (res.status === 401 || data.error === 'Invalid token') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        dispatch(logout());
+        showToast('Oturum süreniz doldu. Lütfen yeniden giriş yapın.', 'error');
+        router.push('/auth/login');
+        return;
+      }
       setCheckoutResult(data);
-      if (res.ok) {
-        // Clear cart for successful items, or just clear whole cart
+      if (res.ok && data.successful && data.successful.length > 0) {
         dispatch(clearCart());
+        showToast('Siparişiniz başarıyla alındı!', 'success');
       }
     } catch (e) {
       setCheckoutResult({ error: 'Bağlantı hatası' });

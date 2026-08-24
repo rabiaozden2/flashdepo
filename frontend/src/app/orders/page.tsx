@@ -25,6 +25,12 @@ export default function OrdersPage() {
           headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
+        if (res.status === 401 || data.error === 'Invalid token') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          router.push('/auth/login');
+          return;
+        }
         if (res.ok) {
           setOrders(data.data || []);
         }
