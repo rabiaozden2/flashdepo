@@ -36,8 +36,8 @@ export default function AdminPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
 
   useEffect(() => {
-    if (!token || user?.role !== 'admin') {
-      router.push('/');
+    if (!token || (user?.role !== 'admin' && user?.role !== 'warehouse_manager')) {
+      router.push('/admin/login');
       return;
     }
 

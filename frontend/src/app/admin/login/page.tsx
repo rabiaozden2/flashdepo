@@ -7,9 +7,10 @@ import { loginStart } from '@/store/slices/authSlice';
 import { Box, Button, Container, Heading, Input, VStack, Text, HStack, Card, Badge } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FiUser, FiLock, FiAlertCircle, FiArrowRight, FiShield } from 'react-icons/fi';
+import { FiShield, FiLock, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
+import { showToast } from '@/components/Toast';
 
-export default function CustomerLoginPage() {
+export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
@@ -17,11 +18,11 @@ export default function CustomerLoginPage() {
   const { loading, error, token, user } = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
-    if (token) {
-      if (user?.role === 'admin' || user?.role === 'warehouse_manager') {
+    if (token && user) {
+      if (user.role === 'admin' || user.role === 'warehouse_manager') {
         router.push('/admin');
       } else {
-        router.push('/');
+        showToast('Bu portal sadece Admin ve Depo Yöneticileri içindir.', 'error');
       }
     }
   }, [token, user, router]);
@@ -38,17 +39,17 @@ export default function CustomerLoginPage() {
         <Card.Root bg="gray.900" borderColor="gray.800" borderWidth="1px" borderRadius="2xl" p={2}>
           <Card.Header p={6} pb={2} textAlign="center">
             <VStack gap={3}>
-              <Box p={3} bg="emerald.500/10" borderRadius="xl" color="emerald.400">
-                <FiUser size={28} />
+              <Box p={3} bg="pink.500/10" borderRadius="xl" color="pink.400">
+                <FiShield size={28} />
               </Box>
-              <Badge colorPalette="emerald" variant="subtle" size="sm" borderRadius="md" px={3} py={1}>
-                Müşteri Giriş Portalı
+              <Badge colorPalette="pink" variant="subtle" size="sm" borderRadius="md" px={3} py={1}>
+                Yönetici & Admin Portalı
               </Badge>
               <Heading size="lg" color="white" fontWeight="bold">
-                Müşteri Girişi
+                Yönetici Girişi
               </Heading>
               <Text color="gray.400" fontSize="xs">
-                Anlık flash sale fırsatlarını incelemek ve sipariş vermek için giriş yapın.
+                Sistem yöneticileri ve yetkili depo yöneticileri için güvenli yönetim portalı.
               </Text>
             </VStack>
           </Card.Header>
@@ -66,10 +67,10 @@ export default function CustomerLoginPage() {
             <form onSubmit={handleSubmit}>
               <VStack align="stretch" gap={4}>
                 <Box>
-                  <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">e-Posta Adresiniz</Text>
+                  <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">Yönetici e-Posta</Text>
                   <Input
                     type="email"
-                    placeholder="musteri@mail.com"
+                    placeholder="admin@flashdepo.com"
                     size="md"
                     borderRadius="lg"
                     bg="gray.950"
@@ -100,35 +101,28 @@ export default function CustomerLoginPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  colorPalette="emerald"
+                  colorPalette="pink"
                   borderRadius="lg"
                   fontWeight="bold"
                   loading={loading}
                   mt={2}
                 >
-                  <FiLock size={16} /> Hesabıma Giriş Yap
+                  <FiLock size={16} /> Admin Paneline Giriş Yap
                 </Button>
               </VStack>
             </form>
           </Card.Body>
 
           <Card.Footer p={6} pt={0}>
-            <HStack w="full" justify="space-between" flexWrap="wrap" gap={2}>
+            <HStack w="full" justify="center">
               <Text color="gray.500" fontSize="xs">
-                Hesabın yok mu?{' '}
-                <Link href="/auth/register">
-                  <Text as="span" color="purple.400" fontWeight="600" _hover={{ textDecoration: 'underline' }}>
-                    Kayıt Ol
+                Müşteri misiniz?{' '}
+                <Link href="/auth/login">
+                  <Text as="span" color="cyan.400" fontWeight="600" _hover={{ textDecoration: 'underline' }}>
+                    Müşteri Girişi Yap <FiArrowRight style={{ display: 'inline' }} />
                   </Text>
                 </Link>
               </Text>
-
-              <Link href="/admin/login">
-                <HStack gap={1} color="pink.400" fontSize="xs" fontWeight="600" _hover={{ textDecoration: 'underline' }}>
-                  <FiShield size={12} />
-                  <Text>Admin Girişi</Text>
-                </HStack>
-              </Link>
             </HStack>
           </Card.Footer>
         </Card.Root>
