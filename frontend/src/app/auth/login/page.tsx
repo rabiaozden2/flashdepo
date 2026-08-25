@@ -41,11 +41,6 @@ export default function LoginPage() {
     dispatch(loginStart({ email, password }));
   };
 
-  const fillDemoAccount = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-  };
-
   return (
     <Box
       minH="100vh"
@@ -215,41 +210,7 @@ export default function LoginPage() {
           </Button>
         </VStack>
 
-        {/* Quick Demo Fill Buttons */}
-        <Box mt={5} pt={4} borderTop="1px solid rgba(255,255,255,0.06)">
-          <Text fontSize="xs" color="whiteAlpha.400" mb={2} textAlign="center" fontWeight="500">
-            Hızlı Test İçin Örnek Hesaplar:
-          </Text>
-          <HStack gap={2} justify="center" flexWrap="wrap">
-            <Button
-              size="xs"
-              colorPalette="pink"
-              variant="subtle"
-              borderRadius="lg"
-              onClick={() => fillDemoAccount('admin@flashdepo.com', 'admin123')}
-            >
-              <FiShield size={12} /> Admin
-            </Button>
-            <Button
-              size="xs"
-              colorPalette="cyan"
-              variant="subtle"
-              borderRadius="lg"
-              onClick={() => fillDemoAccount('manager1@flashdepo.com', 'manager123')}
-            >
-              <FiBriefcase size={12} /> Depo Yöneticisi
-            </Button>
-            <Button
-              size="xs"
-              colorPalette="emerald"
-              variant="subtle"
-              borderRadius="lg"
-              onClick={() => fillDemoAccount('customer@flashdepo.com', 'customer123')}
-            >
-              <FiUser size={12} /> Müşteri
-            </Button>
-          </HStack>
-        </Box>
+
 
         {/* Divider */}
         <HStack gap={3} my={6}>
