@@ -132,10 +132,10 @@ export default function Navbar() {
             </Link>
           )}
           {token && user?.role === 'customer' && (
-            <Link href="/profile">
+            <Link href="/apply">
               <Text color="cyan.400" fontWeight="600" fontSize="sm" _hover={{ color: 'cyan.300' }}
                 style={{ transition: 'color 0.2s' }}>
-                🚀 Satıcı Ol (Depo Yönet)
+                🚀 Satıcı Ol (Başvuru Yap)
               </Text>
             </Link>
           )}
