@@ -4,19 +4,16 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { registerStart } from '@/store/slices/authSlice';
-import { Box, Button, VStack, Text, HStack, Heading, Input } from '@chakra-ui/react';
+import { Box, Button, Container, Heading, Input, VStack, Text, HStack, Card, Badge } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
+import { FiUserPlus, FiLock, FiAlertCircle, FiArrowRight } from 'react-icons/fi';
 import { showToast } from '@/components/Toast';
-import { FiShield, FiBriefcase, FiUser } from 'react-icons/fi';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'customer' | 'warehouse_manager' | 'admin'>('customer');
   const [submitted, setSubmitted] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
   const { loading, error } = useSelector((state: RootState) => state.auth);
@@ -30,231 +27,108 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email || !password) return;
     setSubmitted(true);
-    dispatch(registerStart({ email, password, role }));
+    dispatch(registerStart({ email, password, role: 'customer' }));
   };
 
-  const inputStyle = (name: string) => ({
-    background: focused === name ? 'rgba(236,72,153,0.15)' : 'rgba(255,255,255,0.05)',
-    border: `1px solid ${focused === name ? 'rgba(236,72,153,0.6)' : 'rgba(255,255,255,0.1)'}`,
-    borderRadius: '12px',
-    color: 'white',
-    height: '52px',
-    fontSize: '15px',
-    paddingLeft: '16px',
-    transition: 'all 0.3s ease',
-    outline: 'none',
-    boxShadow: focused === name ? '0 0 20px rgba(236,72,153,0.2)' : 'none',
-    width: '100%',
-  });
-
   return (
-    <Box
-      minH="100vh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      position="relative"
-      zIndex={1}
-      px={4}
-    >
-      <Box
-        w="full"
-        maxW="420px"
-        style={{
-          background: 'rgba(255,255,255,0.04)',
-          backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '28px',
-          padding: '48px 40px',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.4)',
-        }}
-      >
-        {/* Header */}
-        <VStack gap={2} mb={8}>
-          <Box
-            mb={3}
-            style={{
-              width: '64px',
-              height: '64px',
-              background: 'linear-gradient(135deg, #ec4899, #f97316)',
-              borderRadius: '18px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '28px',
-              boxShadow: '0 8px 24px rgba(236,72,153,0.5)',
-            }}
-          >
-            🚀
-          </Box>
-          <Heading
-            size="xl"
-            fontWeight="900"
-            style={{
-              background: 'linear-gradient(135deg, #ffffff, #ec4899)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            Hesap Oluştur
-          </Heading>
-          <Text color="whiteAlpha.500" fontSize="sm" textAlign="center">
-            Ücretsiz kayıt ol, flash sale fırsatlarını yakala!
-          </Text>
-        </VStack>
+    <Box minH="100vh" bg="gray.950" display="flex" alignItems="center" justifyContent="center" px={4} py={12}>
+      <Container maxW="420px">
+        <Card.Root bg="gray.900" borderColor="gray.800" borderWidth="1px" borderRadius="2xl" p={2}>
+          <Card.Header p={6} pb={2} textAlign="center">
+            <VStack gap={3}>
+              <Box p={3} bg="purple.500/10" borderRadius="xl" color="purple.400">
+                <FiUserPlus size={28} />
+              </Box>
+              <Badge colorPalette="purple" variant="subtle" size="sm" borderRadius="md" px={3} py={1}>
+                Ücretsiz Müşteri Kaydı
+              </Badge>
+              <Heading size="lg" color="white" fontWeight="bold">
+                Hesap Oluştur
+              </Heading>
+              <Text color="gray.400" fontSize="xs">
+                Anlık flash sale fırsatlarını kaçırmamak için hemen kayıt olun.
+              </Text>
+            </VStack>
+          </Card.Header>
 
-        {/* Error */}
-        {error && submitted && (
-          <Box
-            mb={4}
-            p={3}
-            style={{
-              background: 'rgba(239,68,68,0.12)',
-              border: '1px solid rgba(239,68,68,0.3)',
-              borderRadius: '12px',
-            }}
-          >
-            <Text color="red.400" fontSize="sm" textAlign="center">{error}</Text>
-          </Box>
-        )}
+          <Card.Body p={6}>
+            {error && submitted && (
+              <Box mb={4} p={3} bg="red.500/10" borderColor="red.500/30" borderWidth="1px" borderRadius="lg">
+                <HStack gap={2}>
+                  <FiAlertCircle color="#f87171" size={16} />
+                  <Text color="red.300" fontSize="xs">{error}</Text>
+                </HStack>
+              </Box>
+            )}
 
-        {/* Form */}
-        <VStack as="form" onSubmit={handleSubmit} gap={4} align="stretch">
-          <Box>
-            <Text fontSize="sm" color="whiteAlpha.700" mb={2} fontWeight="600">E-posta</Text>
-            <Input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="ornek@mail.com"
-              size="lg"
-              borderRadius="xl"
-              bg="whiteAlpha.100"
-              borderColor="whiteAlpha.200"
-              color="white"
-              _focus={{ borderColor: "pink.400", bg: "whiteAlpha.200", boxShadow: "0 0 20px rgba(236,72,153,0.3)" }}
-              _placeholder={{ color: "whiteAlpha.400" }}
-              h="52px"
-            />
-          </Box>
+            <form onSubmit={handleSubmit}>
+              <VStack align="stretch" gap={4}>
+                <Box>
+                  <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">e-Posta Adresiniz *</Text>
+                  <Input
+                    type="email"
+                    placeholder="ornek@mail.com"
+                    size="md"
+                    borderRadius="lg"
+                    bg="gray.950"
+                    borderColor="gray.800"
+                    color="white"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                  />
+                </Box>
 
-          <Box>
-            <Text fontSize="sm" color="whiteAlpha.700" mb={2} fontWeight="600">
-              Şifre <Text as="span" color="whiteAlpha.400" fontWeight="400">(Min. 6 karakter)</Text>
-            </Text>
-            <Input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              minLength={6}
-              placeholder="••••••••"
-              size="lg"
-              borderRadius="xl"
-              bg="whiteAlpha.100"
-              borderColor="whiteAlpha.200"
-              color="white"
-              _focus={{ borderColor: "pink.400", bg: "whiteAlpha.200", boxShadow: "0 0 20px rgba(236,72,153,0.3)" }}
-              _placeholder={{ color: "whiteAlpha.400" }}
-              h="52px"
-            />
-          </Box>
+                <Box>
+                  <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">
+                    Şifre <Text as="span" color="gray.500" fontWeight="400">(Min. 6 karakter) *</Text>
+                  </Text>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    size="md"
+                    borderRadius="lg"
+                    bg="gray.950"
+                    borderColor="gray.800"
+                    color="white"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </Box>
 
-          <Box>
-            <Text fontSize="sm" color="whiteAlpha.700" mb={2} fontWeight="600">Hesap Türü (Rol)</Text>
-            <HStack gap={2}>
-              <Button
-                type="button"
-                flex={1}
-                size="sm"
-                colorPalette="emerald"
-                variant={role === 'customer' ? 'solid' : 'subtle'}
-                borderRadius="xl"
-                onClick={() => setRole('customer')}
-              >
-                <FiUser size={13} /> Müşteri
-              </Button>
-              <Button
-                type="button"
-                flex={1}
-                size="sm"
-                colorPalette="cyan"
-                variant={role === 'warehouse_manager' ? 'solid' : 'subtle'}
-                borderRadius="xl"
-                onClick={() => setRole('warehouse_manager')}
-              >
-                <FiBriefcase size={13} /> Depo Yön.
-              </Button>
-              <Button
-                type="button"
-                flex={1}
-                size="sm"
-                colorPalette="pink"
-                variant={role === 'admin' ? 'solid' : 'subtle'}
-                borderRadius="xl"
-                onClick={() => setRole('admin')}
-              >
-                <FiShield size={13} /> Admin
-              </Button>
+                <Button
+                  type="submit"
+                  size="lg"
+                  colorPalette="purple"
+                  borderRadius="lg"
+                  fontWeight="bold"
+                  loading={loading}
+                  mt={2}
+                >
+                  <FiLock size={16} /> Ücretsiz Kayıt Ol
+                </Button>
+              </VStack>
+            </form>
+          </Card.Body>
+
+          <Card.Footer p={6} pt={0}>
+            <HStack w="full" justify="center">
+              <Text color="gray.500" fontSize="xs">
+                Zaten hesabın var mı?{' '}
+                <Link href="/auth/login">
+                  <Text as="span" color="purple.400" fontWeight="600" _hover={{ textDecoration: 'underline' }}>
+                    Giriş Yap <FiArrowRight style={{ display: 'inline' }} />
+                  </Text>
+                </Link>
+              </Text>
             </HStack>
-          </Box>
-
-          <Button
-            type="submit"
-            width="full"
-            size="lg"
-            disabled={loading}
-            mt={2}
-            style={{
-              background: loading
-                ? 'rgba(236,72,153,0.4)'
-                : 'linear-gradient(135deg, #ec4899, #f97316)',
-              border: 'none',
-              borderRadius: '14px',
-              color: 'white',
-              fontWeight: '800',
-              fontSize: '15px',
-              height: '52px',
-              boxShadow: loading ? 'none' : '0 8px 24px rgba(236,72,153,0.5)',
-              transition: 'all 0.3s ease',
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
-          >
-            {loading ? 'Kayıt yapılıyor...' : '🚀 Kayıt Ol'}
-          </Button>
-        </VStack>
-
-        {/* Divider */}
-        <HStack gap={3} my={6}>
-          <Box flex={1} h="1px" bg="rgba(255,255,255,0.08)" />
-          <Text fontSize="xs" color="whiteAlpha.400">veya</Text>
-          <Box flex={1} h="1px" bg="rgba(255,255,255,0.08)" />
-        </HStack>
-
-        {/* Login link */}
-        <Text textAlign="center" color="whiteAlpha.500" fontSize="sm">
-          Zaten hesabın var mı?{' '}
-          <Link href="/auth/login">
-            <Text
-              as="span"
-              fontWeight="700"
-              style={{
-                background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                cursor: 'pointer',
-              }}
-            >
-              Giriş Yap →
-            </Text>
-          </Link>
-        </Text>
-      </Box>
+          </Card.Footer>
+        </Card.Root>
+      </Container>
     </Box>
   );
 }
