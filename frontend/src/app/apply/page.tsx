@@ -63,94 +63,83 @@ export default function ApplyPage() {
   };
 
   return (
-    <Box position="relative" zIndex={1} minH="100vh" py={12}>
+    <Box minH="100vh" py={12} bg="gray.950">
       <Container maxW="container.md" px={6}>
-        {/* Header */}
-        <VStack align="center" textAlign="center" gap={3} mb={10}>
-          <Badge colorPalette="cyan" variant="subtle" size="lg" borderRadius="full" px={4} py={1}>
-            <HStack gap={2}>
-              <FiBriefcase size={14} />
-              <Text>Satıcı & Depo Yöneticisi Olun</Text>
+        {/* Clean Header */}
+        <VStack align="start" gap={2} mb={8}>
+          <Badge colorPalette="cyan" variant="subtle" size="md" borderRadius="md" px={3} py={1}>
+            <HStack gap={1.5}>
+              <FiBriefcase size={12} />
+              <Text>Satıcı & Depo Yöneticisi Başvurusu</Text>
             </HStack>
           </Badge>
 
-          <Heading
-            size="2xl"
-            fontWeight="900"
-            style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #38bdf8 50%, #a855f7 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Satıcı & Depo Başvuru Formu
+          <Heading size="xl" color="white" fontWeight="bold">
+            Satıcı & Depo Kayıt Formu
           </Heading>
           
-          <Text color="whiteAlpha.700" fontSize="md" maxW="2xl">
-            FlashDepo platformunda kendi deponuzu kaydettirin, indirimli flash sale kampanyaları oluşturun ve binlerce müşteriye ürün satın.
+          <Text color="gray.400" fontSize="sm">
+            Kendi deponuzu platforma eklemek ve flash sale kampanyaları düzenlemek için başvuru bilgilerini doldurun.
           </Text>
         </VStack>
 
         {submittedApp ? (
-          /* Application Submitted Status Card */
-          <Card.Root bg="whiteAlpha.100" borderColor="cyan.500/40" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)" p={4}>
-            <Card.Header p={6} pb={2}>
-              <HStack justify="space-between">
+          /* Clean Chakra UI Submitted Card */
+          <Card.Root bg="gray.900" borderColor="gray.800" borderWidth="1px" borderRadius="xl">
+            <Card.Header p={6} pb={4}>
+              <HStack justify="space-between" align="start">
                 <HStack gap={3}>
-                  <Box p={3} bg="cyan.500/20" borderRadius="2xl" color="cyan.300">
-                    <FiCheckCircle size={28} />
+                  <Box p={2.5} bg="cyan.500/10" borderRadius="lg" color="cyan.400">
+                    <FiCheckCircle size={24} />
                   </Box>
                   <Box>
-                    <Card.Title color="white" fontSize="xl" fontWeight="bold">
-                      Başvurunuz Admin İstek Kutusunda!
+                    <Card.Title color="white" fontSize="lg" fontWeight="bold">
+                      Başvurunuz İletildi
                     </Card.Title>
-                    <Card.Description color="cyan.300" fontSize="sm">
+                    <Card.Description color="gray.400" fontSize="sm">
                       {submittedApp.status === 'approved' 
-                        ? 'Tebrikler! Admin başvurunuzu onayladı. Hesabınız Satıcı / Depo Yöneticisi yapıldı.'
-                        : 'Başvurunuz inceleniyor. Admin onayının ardından satıcı yetkileriniz açılacaktır.'}
+                        ? 'Tebrikler! Admin başvurunuzu onayladı. Satıcı yetkileriniz aktif.'
+                        : 'Başvurunuz Admin istek kutusuna düştü. İncelemenin ardından yetkilendirileceksiniz.'}
                     </Card.Description>
                   </Box>
                 </HStack>
 
-                <Badge colorPalette={submittedApp.status === 'approved' ? 'emerald' : 'amber'} variant="solid" size="lg" borderRadius="full" px={3} py={1}>
-                  <HStack gap={1}>
-                    {submittedApp.status === 'approved' ? <FiCheckCircle size={12} /> : <FiClock size={12} />}
-                    <Text>{submittedApp.status === 'approved' ? 'Onaylandı' : 'Bekliyor'}</Text>
-                  </HStack>
+                <Badge colorPalette={submittedApp.status === 'approved' ? 'emerald' : 'amber'} variant="subtle" size="md" borderRadius="md">
+                  {submittedApp.status === 'approved' ? 'Onaylandı' : 'Bekliyor'}
                 </Badge>
               </HStack>
             </Card.Header>
 
             <Card.Body p={6}>
-              <VStack align="stretch" gap={4} bg="blackAlpha.500" p={5} borderRadius="2xl" border="1px solid" borderColor="whiteAlpha.100">
+              <VStack align="stretch" gap={3} bg="gray.950" p={4} borderRadius="lg" border="1px solid" borderColor="gray.800">
                 <HStack justify="space-between">
-                  <Text color="whiteAlpha.600" fontSize="sm">Aday e-Posta:</Text>
-                  <Text color="white" fontWeight="bold" fontSize="sm">{submittedApp.email}</Text>
+                  <Text color="gray.400" fontSize="sm">e-Posta:</Text>
+                  <Text color="white" fontWeight="600" fontSize="sm">{submittedApp.email}</Text>
                 </HStack>
                 <HStack justify="space-between">
-                  <Text color="whiteAlpha.600" fontSize="sm">Depo Adı:</Text>
-                  <Text color="cyan.300" fontWeight="bold" fontSize="sm">{submittedApp.warehouseName}</Text>
+                  <Text color="gray.400" fontSize="sm">Depo / Mağaza Adı:</Text>
+                  <Text color="cyan.300" fontWeight="600" fontSize="sm">{submittedApp.warehouseName}</Text>
                 </HStack>
                 <HStack justify="space-between">
-                  <Text color="whiteAlpha.600" fontSize="sm">Şehir / Konum:</Text>
-                  <Text color="white" fontWeight="bold" fontSize="sm">{submittedApp.location}</Text>
+                  <Text color="gray.400" fontSize="sm">Şehir / Konum:</Text>
+                  <Text color="white" fontWeight="600" fontSize="sm">{submittedApp.location}</Text>
                 </HStack>
                 <HStack justify="space-between">
-                  <Text color="whiteAlpha.600" fontSize="sm">Vergi No / Sicil No:</Text>
-                  <Text color="white" fontWeight="bold" fontSize="sm">{submittedApp.taxId}</Text>
+                  <Text color="gray.400" fontSize="sm">Vergi No / Sicil No:</Text>
+                  <Text color="white" fontWeight="600" fontSize="sm">{submittedApp.taxId}</Text>
                 </HStack>
                 <HStack justify="space-between">
-                  <Text color="whiteAlpha.600" fontSize="sm">Başvuru Tarihi:</Text>
-                  <Text color="whiteAlpha.800" fontSize="sm">{submittedApp.date} {submittedApp.time}</Text>
+                  <Text color="gray.400" fontSize="sm">Başvuru Zamanı:</Text>
+                  <Text color="gray.300" fontSize="xs">{submittedApp.date} {submittedApp.time}</Text>
                 </HStack>
               </VStack>
 
-              <HStack justify="center" gap={4} mt={6}>
-                <Button colorPalette="purple" size="lg" borderRadius="xl" onClick={() => router.push('/')}>
+              <HStack justify="start" gap={3} mt={6}>
+                <Button colorPalette="purple" variant="subtle" size="md" borderRadius="lg" onClick={() => router.push('/')}>
                   Anasayfaya Dön
                 </Button>
                 {submittedApp.status === 'approved' && (
-                  <Button colorPalette="emerald" size="lg" borderRadius="xl" onClick={() => router.push('/admin')}>
+                  <Button colorPalette="emerald" size="md" borderRadius="lg" onClick={() => router.push('/admin')}>
                     <FiShield size={16} /> Satıcı Paneline Git
                   </Button>
                 )}
@@ -158,32 +147,32 @@ export default function ApplyPage() {
             </Card.Body>
           </Card.Root>
         ) : (
-          /* Application Form Card */
-          <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
-            <Card.Header p={6} pb={0}>
-              <Card.Title color="white" fontSize="xl" fontWeight="bold">
+          /* Clean Chakra UI Form Card */
+          <Card.Root bg="gray.900" borderColor="gray.800" borderWidth="1px" borderRadius="xl">
+            <Card.Header p={6} pb={2}>
+              <Card.Title color="white" fontSize="lg" fontWeight="bold">
                 <HStack gap={2}>
-                  <FiFileText color="#38bdf8" size={20} />
-                  <Text>Satıcı & Depo Kayıt Formu</Text>
+                  <FiFileText color="#38bdf8" size={18} />
+                  <Text>İşletme ve Depo Detayları</Text>
                 </HStack>
               </Card.Title>
-              <Card.Description color="whiteAlpha.600" fontSize="sm">
-                Aşağıdaki işletme ve depo bilgilerini eksiksiz doldurarak başvurunuzu Admin istek kutusuna iletin.
+              <Card.Description color="gray.400" fontSize="sm">
+                Admin onayının ardından hesabınıza depo ekleme yetkisi tanımlanacaktır.
               </Card.Description>
             </Card.Header>
 
             <Card.Body p={6}>
               <form onSubmit={handleSubmit}>
-                <VStack align="stretch" gap={5}>
+                <VStack align="stretch" gap={4}>
                   <Box>
-                    <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">e-Posta Adresiniz *</Text>
+                    <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">e-Posta Adresiniz *</Text>
                     <Input
                       placeholder="Örn: satici@firma.com"
                       type="email"
-                      size="lg"
-                      borderRadius="xl"
-                      bg="blackAlpha.500"
-                      borderColor="whiteAlpha.200"
+                      size="md"
+                      borderRadius="lg"
+                      bg="gray.950"
+                      borderColor="gray.800"
                       color="white"
                       value={email}
                       onChange={e => setEmail(e.target.value)}
@@ -193,13 +182,13 @@ export default function ApplyPage() {
 
                   <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
                     <Box>
-                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Depo / İşletme Adı *</Text>
+                      <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">Depo / İşletme Adı *</Text>
                       <Input
                         placeholder="Örn: Marmara Lojistik Deposu"
-                        size="lg"
-                        borderRadius="xl"
-                        bg="blackAlpha.500"
-                        borderColor="whiteAlpha.200"
+                        size="md"
+                        borderRadius="lg"
+                        bg="gray.950"
+                        borderColor="gray.800"
                         color="white"
                         value={warehouseName}
                         onChange={e => setWarehouseName(e.target.value)}
@@ -207,13 +196,13 @@ export default function ApplyPage() {
                       />
                     </Box>
                     <Box>
-                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Şehir / Konum *</Text>
+                      <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">Şehir / Konum *</Text>
                       <Input
                         placeholder="Örn: İstanbul / Kadıköy"
-                        size="lg"
-                        borderRadius="xl"
-                        bg="blackAlpha.500"
-                        borderColor="whiteAlpha.200"
+                        size="md"
+                        borderRadius="lg"
+                        bg="gray.950"
+                        borderColor="gray.800"
                         color="white"
                         value={location}
                         onChange={e => setLocation(e.target.value)}
@@ -224,13 +213,13 @@ export default function ApplyPage() {
 
                   <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
                     <Box>
-                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Vergi Kimlik No / Sicil No *</Text>
+                      <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">Vergi Kimlik No / Sicil No *</Text>
                       <Input
                         placeholder="Örn: 9876543210"
-                        size="lg"
-                        borderRadius="xl"
-                        bg="blackAlpha.500"
-                        borderColor="whiteAlpha.200"
+                        size="md"
+                        borderRadius="lg"
+                        bg="gray.950"
+                        borderColor="gray.800"
                         color="white"
                         value={taxId}
                         onChange={e => setTaxId(e.target.value)}
@@ -238,13 +227,13 @@ export default function ApplyPage() {
                       />
                     </Box>
                     <Box>
-                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">İletişim Telefon Numarası</Text>
+                      <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">İletişim Telefon Numarası</Text>
                       <Input
                         placeholder="Örn: 0532 123 45 67"
-                        size="lg"
-                        borderRadius="xl"
-                        bg="blackAlpha.500"
-                        borderColor="whiteAlpha.200"
+                        size="md"
+                        borderRadius="lg"
+                        bg="gray.950"
+                        borderColor="gray.800"
                         color="white"
                         value={phone}
                         onChange={e => setPhone(e.target.value)}
@@ -253,13 +242,13 @@ export default function ApplyPage() {
                   </SimpleGrid>
 
                   <Box>
-                    <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Satılacak Ürün Kategorileri & Açıklama</Text>
+                    <Text color="gray.300" fontSize="xs" mb={1.5} fontWeight="600">Açıklama & Satılacak Ürün Kategorisi</Text>
                     <Input
-                      placeholder="Örn: Cep telefonu, kulaklık ve teknolojik aksesuar stoğu yöneteceğiz."
-                      size="lg"
-                      borderRadius="xl"
-                      bg="blackAlpha.500"
-                      borderColor="whiteAlpha.200"
+                      placeholder="Örn: Elektronik, kulaklık ve teknolojik aksesuar stoğu."
+                      size="md"
+                      borderRadius="lg"
+                      bg="gray.950"
+                      borderColor="gray.800"
                       color="white"
                       value={reason}
                       onChange={e => setReason(e.target.value)}
@@ -270,13 +259,11 @@ export default function ApplyPage() {
                     type="submit"
                     size="lg"
                     colorPalette="cyan"
-                    borderRadius="xl"
-                    height="54px"
+                    borderRadius="lg"
                     fontWeight="bold"
-                    fontSize="md"
                     mt={2}
                   >
-                    <FiSend size={18} /> Başvuruyu Admin İstek Kutusuna İlet
+                    <FiSend size={16} /> Başvuruyu Gönder
                   </Button>
                 </VStack>
               </form>
