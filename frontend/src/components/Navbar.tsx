@@ -8,7 +8,7 @@ import { logout, initializeAuth } from '@/store/slices/authSlice';
 import { clearCart } from '@/store/slices/cartSlice';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FiShoppingBag, FiUser, FiLogOut, FiShield } from 'react-icons/fi';
+import { FiShoppingBag, FiUser, FiLogOut, FiShield, FiBriefcase, FiZap } from 'react-icons/fi';
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -213,32 +213,17 @@ export default function Navbar() {
                     {user.email.split('@')[0]}
                   </Text>
                   <Badge
-                    fontSize="10px"
-                    fontWeight="800"
-                    px={2}
-                    py={0.5}
+                    colorPalette={user.role === 'admin' ? 'pink' : user.role === 'warehouse_manager' ? 'cyan' : 'emerald'}
+                    variant="subtle"
+                    size="sm"
                     borderRadius="full"
-                    style={{
-                      background: user.role === 'admin'
-                        ? 'rgba(236,72,153,0.2)'
-                        : user.role === 'warehouse_manager'
-                        ? 'rgba(6,182,212,0.2)'
-                        : 'rgba(16,185,129,0.2)',
-                      color: user.role === 'admin'
-                        ? '#f472b6'
-                        : user.role === 'warehouse_manager'
-                        ? '#38bdf8'
-                        : '#34d399',
-                      border: `1px solid ${
-                        user.role === 'admin'
-                          ? 'rgba(236,72,153,0.4)'
-                          : user.role === 'warehouse_manager'
-                          ? 'rgba(6,182,212,0.4)'
-                          : 'rgba(16,185,129,0.4)'
-                      }`,
-                    }}
+                    px={2.5}
+                    py={0.5}
                   >
-                    {user.role === 'admin' ? '👑 Admin' : user.role === 'warehouse_manager' ? '🏢 Depo Yön.' : '🛍️ Müşteri'}
+                    <HStack gap={1}>
+                      {user.role === 'admin' ? <FiShield size={11} /> : user.role === 'warehouse_manager' ? <FiBriefcase size={11} /> : <FiUser size={11} />}
+                      <Text>{user.role === 'admin' ? 'Admin' : user.role === 'warehouse_manager' ? 'Depo Yön.' : 'Müşteri'}</Text>
+                    </HStack>
                   </Badge>
                 </HStack>
               </Link>

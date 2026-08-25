@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 import { showToast } from '@/components/Toast';
+import { FiShield, FiBriefcase, FiUser } from 'react-icons/fi';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -170,49 +171,34 @@ export default function RegisterPage() {
                 type="button"
                 flex={1}
                 size="sm"
+                colorPalette="emerald"
+                variant={role === 'customer' ? 'solid' : 'subtle'}
+                borderRadius="xl"
                 onClick={() => setRole('customer')}
-                style={{
-                  background: role === 'customer' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${role === 'customer' ? '#34d399' : 'rgba(255,255,255,0.1)'}`,
-                  color: role === 'customer' ? '#34d399' : 'whiteAlpha.600',
-                  borderRadius: '10px',
-                  fontWeight: '600',
-                  fontSize: '12px',
-                }}
               >
-                🛍️ Müşteri
+                <FiUser size={13} /> Müşteri
               </Button>
               <Button
                 type="button"
                 flex={1}
                 size="sm"
+                colorPalette="cyan"
+                variant={role === 'warehouse_manager' ? 'solid' : 'subtle'}
+                borderRadius="xl"
                 onClick={() => setRole('warehouse_manager')}
-                style={{
-                  background: role === 'warehouse_manager' ? 'rgba(6,182,212,0.2)' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${role === 'warehouse_manager' ? '#38bdf8' : 'rgba(255,255,255,0.1)'}`,
-                  color: role === 'warehouse_manager' ? '#38bdf8' : 'whiteAlpha.600',
-                  borderRadius: '10px',
-                  fontWeight: '600',
-                  fontSize: '12px',
-                }}
               >
-                🏢 Depo Yön.
+                <FiBriefcase size={13} /> Depo Yön.
               </Button>
               <Button
                 type="button"
                 flex={1}
                 size="sm"
+                colorPalette="pink"
+                variant={role === 'admin' ? 'solid' : 'subtle'}
+                borderRadius="xl"
                 onClick={() => setRole('admin')}
-                style={{
-                  background: role === 'admin' ? 'rgba(236,72,153,0.2)' : 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${role === 'admin' ? '#f472b6' : 'rgba(255,255,255,0.1)'}`,
-                  color: role === 'admin' ? '#f472b6' : 'whiteAlpha.600',
-                  borderRadius: '10px',
-                  fontWeight: '600',
-                  fontSize: '12px',
-                }}
               >
-                👑 Admin
+                <FiShield size={13} /> Admin
               </Button>
             </HStack>
           </Box>

@@ -7,6 +7,7 @@ import { loginStart } from '@/store/slices/authSlice';
 import { Box, Button, Container, Heading, Input, VStack, Text, HStack } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { FiShield, FiBriefcase, FiUser, FiZap } from 'react-icons/fi';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -190,27 +191,30 @@ export default function LoginPage() {
           <HStack gap={2} justify="center" flexWrap="wrap">
             <Button
               size="xs"
-              variant="outline"
+              colorPalette="pink"
+              variant="subtle"
+              borderRadius="lg"
               onClick={() => fillDemoAccount('admin@flashdepo.com', 'admin123')}
-              style={{ background: 'rgba(236,72,153,0.1)', border: '1px solid rgba(236,72,153,0.3)', color: '#f472b6', borderRadius: '8px' }}
             >
-              👑 Admin
+              <FiShield size={12} /> Admin
             </Button>
             <Button
               size="xs"
-              variant="outline"
+              colorPalette="cyan"
+              variant="subtle"
+              borderRadius="lg"
               onClick={() => fillDemoAccount('manager1@flashdepo.com', 'manager123')}
-              style={{ background: 'rgba(6,182,212,0.1)', border: '1px solid rgba(6,182,212,0.3)', color: '#38bdf8', borderRadius: '8px' }}
             >
-              🏢 Depo Yöneticisi
+              <FiBriefcase size={12} /> Depo Yöneticisi
             </Button>
             <Button
               size="xs"
-              variant="outline"
+              colorPalette="emerald"
+              variant="subtle"
+              borderRadius="lg"
               onClick={() => fillDemoAccount('customer@flashdepo.com', 'customer123')}
-              style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', color: '#34d399', borderRadius: '8px' }}
             >
-              🛍️ Müşteri
+              <FiUser size={12} /> Müşteri
             </Button>
           </HStack>
         </Box>

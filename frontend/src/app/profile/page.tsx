@@ -35,7 +35,8 @@ export default function ProfilePage() {
       case 'admin':
         return {
           title: 'Sistem Yöneticisi (Admin)',
-          badge: '👑 Admin',
+          badge: 'Admin',
+          colorPalette: 'pink',
           bg: 'linear-gradient(135deg, rgba(236,72,153,0.2), rgba(124,58,237,0.2))',
           border: 'rgba(236,72,153,0.4)',
           color: '#f472b6',
@@ -44,7 +45,8 @@ export default function ProfilePage() {
       case 'warehouse_manager':
         return {
           title: 'Depo Yöneticisi',
-          badge: '🏢 Depo Yöneticisi',
+          badge: 'Depo Yöneticisi',
+          colorPalette: 'cyan',
           bg: 'linear-gradient(135deg, rgba(6,182,212,0.2), rgba(59,130,246,0.2))',
           border: 'rgba(6,182,212,0.4)',
           color: '#38bdf8',
@@ -53,7 +55,8 @@ export default function ProfilePage() {
       default:
         return {
           title: 'Müşteri (Customer)',
-          badge: '🛍️ Müşteri',
+          badge: 'Müşteri',
+          colorPalette: 'emerald',
           bg: 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(6,182,212,0.2))',
           border: 'rgba(16,185,129,0.4)',
           color: '#34d399',
