@@ -207,13 +207,12 @@ export default function CartPage() {
                 size="xl"
                 disabled={isCheckingOut}
                 onClick={handleCheckout}
-                style={{
-                  background: 'linear-gradient(135deg, #10b981, #06b6d4)',
-                  border: 'none',
-                  color: 'white',
-                  fontWeight: '800',
-                  boxShadow: '0 8px 32px rgba(16,185,129,0.3)',
-                }}
+                colorPalette="emerald"
+                variant="solid"
+                fontWeight="800"
+                borderRadius="xl"
+                height="56px"
+                boxShadow="0 8px 32px rgba(16,185,129,0.4)"
               >
                 {isCheckingOut ? 'Sipariş Geçiliyor...' : 'Sepeti Onayla'}
               </Button>
