@@ -350,58 +350,65 @@ export default function AdminPage() {
         </SimpleGrid>
 
         {/* Tab Selector */}
-        <HStack gap={4} mb={8} flexWrap="wrap">
-          <Button 
-            size="lg"
-            variant={tab === 'products' ? 'solid' : 'subtle'} 
-            colorPalette="cyan" 
-            borderRadius="xl"
-            onClick={() => setTab('products')}
-          >
-            <FiBox size={18} /> Ürün & Envanter Yönetimi
-          </Button>
-          <Button 
-            size="lg"
-            variant={tab === 'applications' ? 'solid' : 'subtle'} 
-            colorPalette="emerald" 
-            borderRadius="xl"
-            onClick={() => setTab('applications')}
-          >
-            <FiBriefcase size={18} /> Satıcı / Depo Yöneticisi Başvuruları ({applications.filter(a => a.status === 'pending').length})
-          </Button>
-        </HStack>
+        {user?.role === 'admin' ? (
+          <HStack gap={4} mb={8} flexWrap="wrap">
+            <Button 
+              size="lg"
+              variant={tab === 'products' ? 'solid' : 'subtle'} 
+              colorPalette="cyan" 
+              borderRadius="xl"
+              onClick={() => setTab('products')}
+            >
+              <FiBox size={18} /> Ürün & Envanter Yönetimi
+            </Button>
+            <Button 
+              size="lg"
+              variant={tab === 'applications' ? 'solid' : 'subtle'} 
+              colorPalette="emerald" 
+              borderRadius="xl"
+              onClick={() => setTab('applications')}
+            >
+              <FiBriefcase size={18} /> Satıcı / Depo Yöneticisi Başvuruları ({applications.filter(a => a.status === 'pending').length})
+            </Button>
+          </HStack>
+        ) : (
+          <Box mb={6} p={4} bg="cyan.500/10" borderRadius="2xl" border="1px solid rgba(6,182,212,0.3)">
+            <HStack gap={3}>
+              <Box p={3} bg="cyan.500/20" borderRadius="xl" color="cyan.300">
+                <FiBriefcase size={22} />
+              </Box>
+              <Box>
+                <HStack gap={2}>
+                  <Text color="white" fontWeight="bold" fontSize="md">
+                    {user?.managerTitle || 'Depo Yöneticisi 1'} Stok Yönetim Paneli
+                  </Text>
+                  <Badge colorPalette="cyan" variant="solid" size="sm">Yetkili Yetki Alanı</Badge>
+                </HStack>
+                <Text color="cyan.200" fontSize="xs" mt={0.5}>
+                  Bu panelde bağlı olduğunuz deponun stok sayılarını canlı olarak artırıp eksiltebilir, envanter takibi yapabilirsiniz.
+                </Text>
+              </Box>
+            </HStack>
+          </Box>
+        )}
 
         {/* Main Content Area */}
         {tab === 'products' ? (
           <VStack align="stretch" gap={6}>
-            {/* Depo Yöneticisi Feature Info Notice */}
-            <Box p={4} bg="cyan.500/10" borderRadius="2xl" border="1px solid rgba(6,182,212,0.3)">
-              <HStack gap={3}>
-                <Box p={2} bg="cyan.500/20" borderRadius="xl" color="cyan.300">
-                  <FiBriefcase size={20} />
-                </Box>
-                <Box>
-                  <Text color="white" fontWeight="bold" fontSize="sm">Depo Yöneticisi Ürün & Stok Girişi</Text>
-                  <Text color="cyan.200" fontSize="xs">
-                    Ürün ekleme ve envanter yönetimi onaylı <b>Depo Yöneticileri (Satıcılar)</b> tarafından gerçekleştirilir. Admin onaylı kullanıcılar kendi depolarına ürün ve stok girebilir.
-                  </Text>
-                </Box>
-              </HStack>
-            </Box>
-
-            {/* Compact Product Creation Card */}
-            <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
-              <Card.Header p={4} pb={2}>
-                <HStack justify="space-between">
-                  <Card.Title color="white" fontSize="md" fontWeight="bold">
-                    <HStack gap={2}>
-                      <FiPackage color="#38bdf8" size={16} />
-                      <Text>Hızlı Ürün Girişi</Text>
-                    </HStack>
-                  </Card.Title>
-                  <Badge colorPalette="cyan" variant="subtle" size="xs">Depo Yetkili İşlemi</Badge>
-                </HStack>
-              </Card.Header>
+            {/* Compact Product Creation Card (Only for Admin) */}
+            {user?.role === 'admin' && (
+              <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
+                <Card.Header p={4} pb={2}>
+                  <HStack justify="space-between">
+                    <Card.Title color="white" fontSize="md" fontWeight="bold">
+                      <HStack gap={2}>
+                        <FiPackage color="#38bdf8" size={16} />
+                        <Text>Yeni Ürün Girişi (Katalog Ekleme)</Text>
+                      </HStack>
+                    </Card.Title>
+                    <Badge colorPalette="cyan" variant="subtle" size="xs">Admin İşlemi</Badge>
+                  </HStack>
+                </Card.Header>
 
               <Card.Body p={4}>
                 <VStack align="stretch" gap={3}>
@@ -510,6 +517,7 @@ export default function AdminPage() {
                 </VStack>
               </Card.Body>
             </Card.Root>
+            )}
 
             {/* Inventory Table Card */}
             <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">

@@ -123,7 +123,7 @@ export default function Navbar() {
               Kampanyalar
             </Text>
           </Link>
-          {token && (
+          {token && user?.role === 'customer' && (
             <Link href="/orders">
               <Text color="whiteAlpha.700" fontWeight="500" fontSize="sm" _hover={{ color: 'white' }}
                 style={{ transition: 'color 0.2s' }}>
@@ -139,60 +139,62 @@ export default function Navbar() {
               </HStack>
             </Link>
           )}
-          {token && user?.role === 'admin' && (
+          {token && (user?.role === 'admin' || user?.role === 'warehouse_manager') && (
             <Link href="/admin">
               <Text color="fuchsia.400" fontWeight="600" fontSize="sm" _hover={{ color: 'fuchsia.300' }}
                 style={{ transition: 'color 0.2s' }}>
-                Admin Paneli
+                {user?.role === 'admin' ? 'Admin Paneli' : 'Depo Stok Paneli'}
               </Text>
             </Link>
           )}
         </HStack>
 
         <HStack gap={5}>
-          {/* Cart Icon */}
-          <Link href="/cart">
-            <Box
-              position="relative"
-              cursor="pointer"
-              p={2.5}
-              borderRadius="14px"
-              style={{
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                transition: 'all 0.2s ease',
-              }}
-              _hover={{ bg: 'rgba(255,255,255,0.12)' }}
-            >
-              <FiShoppingBag size={22} color="#ffffff" />
-              {totalCartItems > 0 && (
-                <Box
-                  position="absolute"
-                  top="-6px"
-                  right="-6px"
-                  style={{
-                    background: '#ef4444',
-                    color: '#ffffff',
-                    borderRadius: '999px',
-                    fontSize: '12px',
-                    fontWeight: '900',
-                    minWidth: '22px',
-                    height: '22px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '2px solid #ffffff',
-                    boxShadow: '0 4px 12px rgba(239,68,68,0.8)',
-                    padding: '0 5px',
-                    lineHeight: 1,
-                    zIndex: 10,
-                  }}
-                >
-                  {totalCartItems}
-                </Box>
-              )}
-            </Box>
-          </Link>
+          {/* Cart Icon - Only visible to Customers or Guests */}
+          {(!user || user?.role === 'customer') && (
+            <Link href="/cart">
+              <Box
+                position="relative"
+                cursor="pointer"
+                p={2.5}
+                borderRadius="14px"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  transition: 'all 0.2s ease',
+                }}
+                _hover={{ bg: 'rgba(255,255,255,0.12)' }}
+              >
+                <FiShoppingBag size={22} color="#ffffff" />
+                {totalCartItems > 0 && (
+                  <Box
+                    position="absolute"
+                    top="-6px"
+                    right="-6px"
+                    style={{
+                      background: '#ef4444',
+                      color: '#ffffff',
+                      borderRadius: '999px',
+                      fontSize: '12px',
+                      fontWeight: '900',
+                      minWidth: '22px',
+                      height: '22px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '2px solid #ffffff',
+                      boxShadow: '0 4px 12px rgba(239,68,68,0.8)',
+                      padding: '0 5px',
+                      lineHeight: 1,
+                      zIndex: 10,
+                    }}
+                  >
+                    {totalCartItems}
+                  </Box>
+                )}
+              </Box>
+            </Link>
+          )}
 
           {/* Auth section */}
           {token && user ? (
