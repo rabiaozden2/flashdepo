@@ -5,7 +5,7 @@ import { Box, Container, Heading, VStack, HStack, Text, Button, Input, Card, Bad
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
-import { FiBriefcase, FiSend, FiCheckCircle, FiClock, FiShield, FiPackage, FiZap } from 'react-icons/fi';
+import { FiBriefcase, FiSend, FiCheckCircle, FiClock, FiShield, FiFileText } from 'react-icons/fi';
 import { showToast } from '@/components/Toast';
 
 export default function ApplyPage() {
@@ -36,7 +36,7 @@ export default function ApplyPage() {
     e.preventDefault();
 
     if (!email || !warehouseName || !location || !taxId) {
-      showToast('Lütfen zorunlu başvuru alanlarını doldurun.', 'error');
+      showToast('Lütfen tüm zorunlu başvuru alanlarını doldurun.', 'error');
       return;
     }
 
@@ -106,14 +106,17 @@ export default function ApplyPage() {
                     </Card.Title>
                     <Card.Description color="cyan.300" fontSize="sm">
                       {submittedApp.status === 'approved' 
-                        ? '🎉 Tebrikler! Admin başvurunuzu onayladı. Hesabınız Satıcı / Depo Yöneticisi yapıldı.'
-                        : '⏳ Başvurunuz inceleniyor. Admin onayının ardından satıcı yetkileriniz açılacaktır.'}
+                        ? 'Tebrikler! Admin başvurunuzu onayladı. Hesabınız Satıcı / Depo Yöneticisi yapıldı.'
+                        : 'Başvurunuz inceleniyor. Admin onayının ardından satıcı yetkileriniz açılacaktır.'}
                     </Card.Description>
                   </Box>
                 </HStack>
 
                 <Badge colorPalette={submittedApp.status === 'approved' ? 'emerald' : 'amber'} variant="solid" size="lg" borderRadius="full" px={3} py={1}>
-                  {submittedApp.status === 'approved' ? '✅ Onaylandı' : '⏳ Bekliyor'}
+                  <HStack gap={1}>
+                    {submittedApp.status === 'approved' ? <FiCheckCircle size={12} /> : <FiClock size={12} />}
+                    <Text>{submittedApp.status === 'approved' ? 'Onaylandı' : 'Bekliyor'}</Text>
+                  </HStack>
                 </Badge>
               </HStack>
             </Card.Header>
@@ -159,7 +162,10 @@ export default function ApplyPage() {
           <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
             <Card.Header p={6} pb={0}>
               <Card.Title color="white" fontSize="xl" fontWeight="bold">
-                📝 Satıcı & Depo Kayıt Formu
+                <HStack gap={2}>
+                  <FiFileText color="#38bdf8" size={20} />
+                  <Text>Satıcı & Depo Kayıt Formu</Text>
+                </HStack>
               </Card.Title>
               <Card.Description color="whiteAlpha.600" fontSize="sm">
                 Aşağıdaki işletme ve depo bilgilerini eksiksiz doldurarak başvurunuzu Admin istek kutusuna iletin.
