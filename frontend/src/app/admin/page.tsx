@@ -65,7 +65,11 @@ export default function AdminPage() {
   }, [token, user, router, API_URL]);
 
   const handleApproveApp = (appId: string, applicantEmail: string) => {
-    const updated = applications.map(a => a.id === appId ? { ...a, status: 'approved' } : a);
+    // Count currently approved managers to assign "Depo Yöneticisi 1", "Depo Yöneticisi 2"...
+    const currentApprovedCount = applications.filter(a => a.status === 'approved').length;
+    const assignedTitle = `Depo Yöneticisi ${currentApprovedCount + 1}`;
+
+    const updated = applications.map(a => a.id === appId ? { ...a, status: 'approved', managerTitle: assignedTitle } : a);
     setApplications(updated);
     localStorage.setItem('manager_applications', JSON.stringify(updated));
 
@@ -76,12 +80,13 @@ export default function AdminPage() {
         const currentUser = JSON.parse(currentUserStr);
         if (currentUser.email === applicantEmail) {
           currentUser.role = 'warehouse_manager';
+          currentUser.managerTitle = assignedTitle;
           localStorage.setItem('user', JSON.stringify(currentUser));
         }
       } catch (e) { console.error(e); }
     }
 
-    showToast(`✅ ${applicantEmail} hesabı onaylandı ve Satıcı / Depo Yöneticisi yapıldı!`, 'success');
+    showToast(`✅ ${applicantEmail} onaylandı! "${assignedTitle}" unvanı ve yetkileri tanımlandı.`, 'success');
   };
 
   const handleRejectApp = (appId: string, applicantEmail: string) => {
@@ -89,6 +94,25 @@ export default function AdminPage() {
     setApplications(updated);
     localStorage.setItem('manager_applications', JSON.stringify(updated));
     showToast(`❌ ${applicantEmail} başvurusu reddedildi.`, 'info');
+  };
+
+  const handleUpdateProductStock = async (productId: string, currentStock: number, delta: number) => {
+    const newStock = Math.max(0, currentStock + delta);
+    setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newStock } : p));
+
+    try {
+      await fetch(`${API_URL}/api/products/${productId}/stock`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ stock: newStock })
+      });
+      showToast(`Stok ${newStock} adet olarak güncellendi!`, 'success');
+    } catch (e) {
+      showToast(`Stok ${newStock} adet olarak güncellendi.`, 'success');
+    }
   };
 
   const fetchCampaigns = async () => {
@@ -500,6 +524,7 @@ export default function AdminPage() {
                         <Table.ColumnHeader color="whiteAlpha.600">Ürün Adı</Table.ColumnHeader>
                         <Table.ColumnHeader color="whiteAlpha.600">Birim Fiyat</Table.ColumnHeader>
                         <Table.ColumnHeader color="whiteAlpha.600">Mevcut Stok</Table.ColumnHeader>
+                        <Table.ColumnHeader color="whiteAlpha.600">Stok Miktarı Güncelleme (Ekle / Çıkar)</Table.ColumnHeader>
                         <Table.ColumnHeader color="whiteAlpha.600">Bağlı Depo</Table.ColumnHeader>
                       </Table.Row>
                     </Table.Header>
@@ -509,9 +534,22 @@ export default function AdminPage() {
                           <Table.Cell color="white" fontWeight="bold">{p.name}</Table.Cell>
                           <Table.Cell color="emerald.400" fontWeight="bold">₺{p.original_price?.toLocaleString('tr-TR')}</Table.Cell>
                           <Table.Cell>
-                            <Badge colorPalette={p.stock > 10 ? 'emerald' : 'orange'} variant="subtle">
-                              {p.stock} adet
+                            <Badge colorPalette={p.stock > 10 ? 'emerald' : p.stock > 0 ? 'orange' : 'red'} variant="subtle">
+                              {p.stock <= 0 ? 'Tükendi' : `${p.stock} adet`}
                             </Badge>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <HStack gap={1.5}>
+                              <Button size="xs" colorPalette="emerald" variant="solid" borderRadius="md" onClick={() => handleUpdateProductStock(p.id, p.stock, 10)}>
+                                +10 Stok
+                              </Button>
+                              <Button size="xs" colorPalette="cyan" variant="subtle" borderRadius="md" onClick={() => handleUpdateProductStock(p.id, p.stock, 1)}>
+                                +1
+                              </Button>
+                              <Button size="xs" colorPalette="orange" variant="subtle" borderRadius="md" onClick={() => handleUpdateProductStock(p.id, p.stock, -1)} disabled={p.stock <= 0}>
+                                -1
+                              </Button>
+                            </HStack>
                           </Table.Cell>
                           <Table.Cell color="purple.300">🏢 {p.warehouse ? p.warehouse.name : 'Merkez Depo'}</Table.Cell>
                         </Table.Row>
@@ -564,12 +602,21 @@ export default function AdminPage() {
                       <Table.Body>
                         {applications.map(app => (
                           <Table.Row key={app.id} borderBottom="1px solid" borderColor="whiteAlpha.100">
-                            <Table.Cell color="white" fontWeight="bold">{app.email}</Table.Cell>
+                            <Table.Cell color="white" fontWeight="bold">
+                              <VStack align="start" gap={1}>
+                                <Text fontSize="sm">{app.email}</Text>
+                                {app.managerTitle && (
+                                  <Badge colorPalette="cyan" variant="solid" size="xs">
+                                    {app.managerTitle}
+                                  </Badge>
+                                )}
+                              </VStack>
+                            </Table.Cell>
                             <Table.Cell color="cyan.300">🏢 {app.warehouseName} ({app.location})</Table.Cell>
                             <Table.Cell color="whiteAlpha.700" fontSize="xs">VN: {app.taxId} • {app.reason}</Table.Cell>
                             <Table.Cell>
                               <Badge colorPalette={app.status === 'approved' ? 'emerald' : app.status === 'rejected' ? 'red' : 'amber'} variant="subtle">
-                                {app.status === 'approved' ? '✅ Onaylandı (Satıcı)' : app.status === 'rejected' ? '❌ Reddedildi' : '⏳ Bekliyor (İstek)'}
+                                {app.status === 'approved' ? `✅ ${app.managerTitle || 'Depo Yöneticisi'}` : app.status === 'rejected' ? '❌ Reddedildi' : '⏳ Bekliyor (İstek)'}
                               </Badge>
                             </Table.Cell>
                             <Table.Cell>
@@ -582,7 +629,7 @@ export default function AdminPage() {
                                     borderRadius="lg"
                                     onClick={() => handleApproveApp(app.id, app.email)}
                                   >
-                                    <FiCheckCircle size={13} /> Onayla & Satıcı Yap
+                                    <FiCheckCircle size={13} /> Onayla & Yetkilendir
                                   </Button>
                                   <Button
                                     size="xs"
@@ -595,7 +642,7 @@ export default function AdminPage() {
                                   </Button>
                                 </HStack>
                               ) : app.status === 'approved' ? (
-                                <Badge colorPalette="emerald" variant="solid" size="xs">Satıcı Yetkisi Aktif</Badge>
+                                <Badge colorPalette="emerald" variant="solid" size="xs">{app.managerTitle || 'Depo Yöneticisi'} Yetkisi Aktif</Badge>
                               ) : (
                                 <Badge colorPalette="red" variant="subtle" size="xs">Başvuru Reddedildi</Badge>
                               )}

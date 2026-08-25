@@ -98,14 +98,14 @@ export default function ApplyPage() {
                     </Card.Title>
                     <Card.Description color="gray.400" fontSize="sm">
                       {submittedApp.status === 'approved' 
-                        ? 'Tebrikler! Admin başvurunuzu onayladı. Satıcı yetkileriniz aktif.'
-                        : 'Başvurunuz Admin istek kutusuna düştü. İncelemenin ardından yetkilendirileceksiniz.'}
+                        ? `🎉 Tebrikler! Admin başvurunuzu onayladı. "${submittedApp.managerTitle || 'Depo Yöneticisi 1'}" unvanı ile stok yönetim yetkileriniz aktif.`
+                        : '⏳ Başvurunuz Admin istek kutusunda inceleniyor. Admin onay verene kadar yetkileriniz pasif kalacaktır.'}
                     </Card.Description>
                   </Box>
                 </HStack>
 
                 <Badge colorPalette={submittedApp.status === 'approved' ? 'emerald' : 'amber'} variant="subtle" size="md" borderRadius="md">
-                  {submittedApp.status === 'approved' ? 'Onaylandı' : 'Bekliyor'}
+                  {submittedApp.status === 'approved' ? (submittedApp.managerTitle || 'Depo Yöneticisi') : '⏳ Onay Bekliyor'}
                 </Badge>
               </HStack>
             </Card.Header>
