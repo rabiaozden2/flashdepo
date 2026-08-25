@@ -9,7 +9,7 @@ import { Box, Container, Heading, SimpleGrid, Grid, Text, Button, Badge, VStack,
 import { useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/CountdownTimer';
 import { showToast } from '@/components/Toast';
-import { FiTrash2 } from 'react-icons/fi';
+import { FiTrash2, FiLock } from 'react-icons/fi';
 
 const CARD_GRADIENTS = [
   'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.2))',
@@ -137,6 +137,10 @@ export default function Home() {
   };
 
   const handleAddToCart = (camp: any) => {
+    if (user?.role === 'warehouse_manager' || user?.role === 'admin') {
+      showToast('Depo Yöneticisi ve Admin hesapları sipariş veremez. Sipariş vermek için Müşteri Girişi yapın.', 'info');
+      return;
+    }
     dispatch(addToCart({
       campaignId: camp.id,
       productId: camp.product_id,
@@ -341,31 +345,45 @@ export default function Home() {
                       )}
                     </HStack>
 
-                    <Button
-                      width="full"
-                      size="lg"
-                      disabled={isOutOfStock || isBuying}
-                      onClick={() => handleAddToCart(camp)}
-                      bg={isOutOfStock ? "whiteAlpha.100" : (isSuccess || cartSuccessId === camp.id) ? "emerald.500" : "linear-gradient(135deg, #7c3aed, #ec4899)"}
-                      color={isOutOfStock ? "whiteAlpha.400" : "white"}
-                      borderRadius="xl"
-                      fontWeight="800"
-                      fontSize="15px"
-                      height="52px"
-                      border="none"
-                      boxShadow={isOutOfStock ? "none" : "0 8px 25px rgba(124,58,237,0.4)"}
-                      _hover={{
-                        bg: isOutOfStock ? "whiteAlpha.100" : (isSuccess || cartSuccessId === camp.id) ? "emerald.600" : "linear-gradient(135deg, #6d28d9, #db2777)",
-                        transform: isOutOfStock ? "none" : "translateY(-2px)",
-                        boxShadow: isOutOfStock ? "none" : "0 12px 30px rgba(124,58,237,0.6)",
-                      }}
-                    >
-                      {isOutOfStock 
-                        ? 'Stok Tükendi' 
-                        : cartSuccessId === camp.id 
-                          ? '✅ Sepete Eklendi!' 
-                          : '🛒 Sepete Ekle'}
-                    </Button>
+                    {user?.role === 'warehouse_manager' ? (
+                      <Button
+                        width="full"
+                        size="lg"
+                        disabled
+                        variant="subtle"
+                        colorPalette="gray"
+                        borderRadius="xl"
+                        height="52px"
+                      >
+                        <FiLock size={14} /> Depo Yöneticisi Sipariş Veremez
+                      </Button>
+                    ) : (
+                      <Button
+                        width="full"
+                        size="lg"
+                        disabled={isOutOfStock || isBuying}
+                        onClick={() => handleAddToCart(camp)}
+                        bg={isOutOfStock ? "whiteAlpha.100" : (isSuccess || cartSuccessId === camp.id) ? "emerald.500" : "linear-gradient(135deg, #7c3aed, #ec4899)"}
+                        color={isOutOfStock ? "whiteAlpha.400" : "white"}
+                        borderRadius="xl"
+                        fontWeight="800"
+                        fontSize="15px"
+                        height="52px"
+                        border="none"
+                        boxShadow={isOutOfStock ? "none" : "0 8px 25px rgba(124,58,237,0.4)"}
+                        _hover={{
+                          bg: isOutOfStock ? "whiteAlpha.100" : (isSuccess || cartSuccessId === camp.id) ? "emerald.600" : "linear-gradient(135deg, #6d28d9, #db2777)",
+                          transform: isOutOfStock ? "none" : "translateY(-2px)",
+                          boxShadow: isOutOfStock ? "none" : "0 12px 30px rgba(124,58,237,0.6)",
+                        }}
+                      >
+                        {isOutOfStock 
+                          ? 'Stok Tükendi' 
+                          : cartSuccessId === camp.id 
+                            ? '✅ Sepete Eklendi!' 
+                            : '🛒 Sepete Ekle'}
+                      </Button>
+                    )}
 
                     <Box mt={4}>
                       <CountdownTimer endTime={camp.end_time} />

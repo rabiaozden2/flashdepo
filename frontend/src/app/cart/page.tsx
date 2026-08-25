@@ -15,7 +15,7 @@ export default function CartPage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { items } = useSelector((state: RootState) => state.cart);
-  const { token } = useSelector((state: RootState) => state.auth);
+  const { token, user } = useSelector((state: RootState) => state.auth);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutResult, setCheckoutResult] = useState<any>(null);
 
@@ -24,6 +24,11 @@ export default function CartPage() {
   const handleCheckout = async () => {
     if (!token) {
       router.push('/auth/login');
+      return;
+    }
+
+    if (user?.role === 'warehouse_manager' || user?.role === 'admin') {
+      showToast('Depo Yöneticisi ve Admin hesapları sipariş veremez. Sipariş için Müşteri Girişi yapın.', 'info');
       return;
     }
 
@@ -188,20 +193,35 @@ export default function CartPage() {
                   ₺{totalAmount.toLocaleString('tr-TR')}
                 </Text>
               </HStack>
-              <Button
-                w="full"
-                size="xl"
-                disabled={isCheckingOut}
-                onClick={handleCheckout}
-                colorPalette="emerald"
-                variant="solid"
-                fontWeight="800"
-                borderRadius="xl"
-                height="56px"
-                boxShadow="0 8px 32px rgba(16,185,129,0.4)"
-              >
-                {isCheckingOut ? 'Sipariş Geçiliyor...' : 'Sepeti Onayla'}
-              </Button>
+              {user?.role === 'warehouse_manager' || user?.role === 'admin' ? (
+                <Button
+                  w="full"
+                  size="xl"
+                  disabled
+                  colorPalette="gray"
+                  variant="subtle"
+                  fontWeight="700"
+                  borderRadius="xl"
+                  height="56px"
+                >
+                  Depo Yöneticisi Rolü Sipariş Veremez
+                </Button>
+              ) : (
+                <Button
+                  w="full"
+                  size="xl"
+                  disabled={isCheckingOut}
+                  onClick={handleCheckout}
+                  colorPalette="emerald"
+                  variant="solid"
+                  fontWeight="800"
+                  borderRadius="xl"
+                  height="56px"
+                  boxShadow="0 8px 32px rgba(16,185,129,0.4)"
+                >
+                  {isCheckingOut ? 'Sipariş Geçiliyor...' : 'Sepeti Onayla'}
+                </Button>
+              )}
             </Box>
           </VStack>
         ) : null}
