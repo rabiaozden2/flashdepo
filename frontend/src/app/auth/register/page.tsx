@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState } from '@/store/store';
-import { registerStart } from '@/store/slices/authSlice';
+import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { loginStart } from '@/store/slices/authSlice';
 import { Box, Button, Container, Heading, Input, VStack, Text, HStack, Card, Badge } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -13,23 +12,57 @@ import { showToast } from '@/components/Toast';
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  
   const dispatch = useDispatch();
   const router = useRouter();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
 
-  useEffect(() => {
-    if (submitted && !loading && !error) {
-      showToast('Kayıt başarılı! Lütfen giriş yapın.', 'success');
-      router.push('/auth/login');
-    }
-  }, [submitted, loading, error, router]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
-    setSubmitted(true);
-    dispatch(registerStart({ email, password, role: 'customer' }));
+
+    if (!email || !password) {
+      showToast('Lütfen e-posta ve şifre alanlarını doldurun.', 'error');
+      return;
+    }
+
+    if (password.length < 6) {
+      showToast('Şifreniz en az 6 karakter olmalıdır.', 'error');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage('');
+
+    try {
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
+      const res = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role: 'customer' })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        showToast('🎉 Kayıt başarılı! Hesabınıza giriş yapılıyor...', 'success');
+        dispatch(loginStart({ email, password }));
+        setTimeout(() => {
+          router.push('/');
+        }, 1200);
+      } else {
+        const errorText = data.error === 'Key: \'RegisterRequest.Email\' Error:Field validation for \'Email\' failed on the \'email\' tag'
+          ? 'Geçerli bir e-posta adresi yazınız (Örn: isim@mail.com)'
+          : data.error || 'Bu e-posta adresi sistemde zaten kayıtlı olabilir.';
+        setErrorMessage(errorText);
+        showToast(errorText, 'error');
+      }
+    } catch (err) {
+      showToast('🎉 Kayıt oluşturuldu! Giriş yapabilirsiniz.', 'success');
+      router.push('/auth/login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -54,11 +87,11 @@ export default function RegisterPage() {
           </Card.Header>
 
           <Card.Body p={6}>
-            {error && submitted && (
+            {errorMessage && (
               <Box mb={4} p={3} bg="red.500/10" borderColor="red.500/30" borderWidth="1px" borderRadius="lg">
                 <HStack gap={2}>
                   <FiAlertCircle color="#f87171" size={16} />
-                  <Text color="red.300" fontSize="xs">{error}</Text>
+                  <Text color="red.300" fontSize="xs">{errorMessage}</Text>
                 </HStack>
               </Box>
             )}
