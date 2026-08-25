@@ -4,6 +4,7 @@ import { Box, Container, Heading, VStack, HStack, Text, Button, Badge, Card } fr
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { updateQuantity, removeFromCart, clearCart } from '@/store/slices/cartSlice';
+import { updateStock } from '@/store/slices/campaignSlice';
 import { logout } from '@/store/slices/authSlice';
 import { showToast } from '@/components/Toast';
 import { useState } from 'react';
@@ -53,10 +54,14 @@ export default function CartPage() {
         router.push('/auth/login');
         return;
       }
-      setCheckoutResult(data);
       if (res.ok && data.successful && data.successful.length > 0) {
+        // Update stock in Redux store for all purchased campaign items
+        items.forEach(item => {
+          const remainingStock = Math.max(0, item.stock - item.quantity);
+          dispatch(updateStock({ campaignId: item.campaignId, newStock: remainingStock }));
+        });
         dispatch(clearCart());
-        showToast('Siparişiniz başarıyla alındı!', 'success');
+        showToast('Siparişiniz başarıyla alındı! Stoklar canlı güncellendi.', 'success');
       }
     } catch (e) {
       setCheckoutResult({ error: 'Bağlantı hatası' });

@@ -51,8 +51,11 @@ const campaignSlice = createSlice({
         },
         updateStock(state, action: PayloadAction<{ campaignId: string; newStock: number }>) {
             const campaign = state.campaigns.find(c => c.id === action.payload.campaignId);
-            if (campaign && campaign.product) {
-                campaign.product.stock = action.payload.newStock;
+            if (campaign) {
+                campaign.campaign_stock = action.payload.newStock;
+                if (campaign.product) {
+                    campaign.product.stock = action.payload.newStock;
+                }
             }
         }
     },

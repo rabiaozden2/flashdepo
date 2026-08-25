@@ -66,19 +66,37 @@ export default function Home() {
     fetchProducts();
 
     const WS_URL = API_URL.replace(/^http/, 'ws') + '/api/ws';
-    const ws = new WebSocket(WS_URL);
-    ws.onmessage = (event) => {
+    let ws: WebSocket | null = null;
+
+    const connectWS = () => {
       try {
-        const data = JSON.parse(event.data);
-        if (data.type === 'STOCK_UPDATE') {
-          dispatch(updateStock({ campaignId: data.campaignId, newStock: data.stock }));
-          fetchProducts(); // Refetch products to update inventory table
-        }
+        ws = new WebSocket(WS_URL);
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            const targetCampaignId = data.campaignId || data.campaign_id || data.id;
+            const newStock = Number(data.stock ?? data.new_stock ?? data.campaign_stock);
+            
+            if (targetCampaignId && !isNaN(newStock)) {
+              dispatch(updateStock({ campaignId: targetCampaignId, newStock }));
+            } else {
+              dispatch(fetchCampaignsStart());
+            }
+            fetchProducts();
+          } catch (e) {
+            console.error('WS parse error:', e);
+          }
+        };
       } catch (e) {
-        console.error(e);
+        console.error('WS error:', e);
       }
     };
-    return () => ws.close();
+
+    connectWS();
+
+    return () => {
+      if (ws) ws.close();
+    };
   }, [dispatch, API_URL]);
 
   const handleBuy = async (campaignId: string) => {
@@ -99,7 +117,14 @@ export default function Home() {
       const data = await res.json();
       if (res.ok) {
         setSuccessId(campaignId);
-        showToast('Siparişiniz başarıyla alındı!', 'success');
+        // Instant local stock reduction for zero-latency UI update
+        const targetCamp = campaigns.find(c => c.id === campaignId);
+        if (targetCamp) {
+          const currentStock = targetCamp.campaign_stock;
+          const newStock = Math.max(0, currentStock - 1);
+          dispatch(updateStock({ campaignId, newStock }));
+        }
+        showToast('Siparişiniz başarıyla alındı! Stok anında güncellendi.', 'success');
         setTimeout(() => setSuccessId(null), 3000);
       } else {
         showToast(data.error || 'Sipariş oluşturulamadı', 'error');
