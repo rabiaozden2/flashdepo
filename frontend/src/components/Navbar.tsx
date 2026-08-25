@@ -22,7 +22,14 @@ export default function Navbar() {
     const savedUserStr = localStorage.getItem('user');
     if (savedToken && savedUserStr) {
       try {
-        const savedUser = JSON.parse(savedUserStr);
+        let savedUser = JSON.parse(savedUserStr);
+        // Check if admin approved this user's application
+        const savedApps = JSON.parse(localStorage.getItem('manager_applications') || '[]');
+        const userApp = savedApps.find((a: any) => a.email === savedUser.email && a.status === 'approved');
+        if (userApp && savedUser.role === 'customer') {
+          savedUser.role = 'warehouse_manager';
+          localStorage.setItem('user', JSON.stringify(savedUser));
+        }
         dispatch(initializeAuth({ token: savedToken, user: savedUser }));
       } catch (e) {
         console.error('Failed to parse user from localStorage');
@@ -91,7 +98,7 @@ export default function Navbar() {
                 boxShadow: '0 4px 15px rgba(124,58,237,0.5)',
               }}
             >
-              <Text fontSize="lg" fontWeight="black" color="white">⚡</Text>
+              <FiZap size={18} color="white" />
             </Box>
             <Heading
               size="lg"
@@ -121,6 +128,14 @@ export default function Navbar() {
               <Text color="whiteAlpha.700" fontWeight="500" fontSize="sm" _hover={{ color: 'white' }}
                 style={{ transition: 'color 0.2s' }}>
                 Siparişlerim
+              </Text>
+            </Link>
+          )}
+          {token && user?.role === 'customer' && (
+            <Link href="/profile">
+              <Text color="cyan.400" fontWeight="600" fontSize="sm" _hover={{ color: 'cyan.300' }}
+                style={{ transition: 'color 0.2s' }}>
+                🚀 Satıcı Ol (Depo Yönet)
               </Text>
             </Link>
           )}

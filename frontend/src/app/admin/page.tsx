@@ -64,11 +64,31 @@ export default function AdminPage() {
     fetchCampaigns();
   }, [token, user, router, API_URL]);
 
-  const handleApproveApp = (appId: string) => {
+  const handleApproveApp = (appId: string, applicantEmail: string) => {
     const updated = applications.map(a => a.id === appId ? { ...a, status: 'approved' } : a);
     setApplications(updated);
     localStorage.setItem('manager_applications', JSON.stringify(updated));
-    showToast('Satıcı / Depo Yöneticisi başvurusu onaylandı! Kullanıcı yetkilendirildi.', 'success');
+
+    // Update logged in user role if it matches candidate
+    const currentUserStr = localStorage.getItem('user');
+    if (currentUserStr) {
+      try {
+        const currentUser = JSON.parse(currentUserStr);
+        if (currentUser.email === applicantEmail) {
+          currentUser.role = 'warehouse_manager';
+          localStorage.setItem('user', JSON.stringify(currentUser));
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    showToast(`✅ ${applicantEmail} hesabı onaylandı ve Satıcı / Depo Yöneticisi yapıldı!`, 'success');
+  };
+
+  const handleRejectApp = (appId: string, applicantEmail: string) => {
+    const updated = applications.map(a => a.id === appId ? { ...a, status: 'rejected' } : a);
+    setApplications(updated);
+    localStorage.setItem('manager_applications', JSON.stringify(updated));
+    showToast(`❌ ${applicantEmail} başvurusu reddedildi.`, 'info');
   };
 
   const fetchCampaigns = async () => {
@@ -760,23 +780,36 @@ export default function AdminPage() {
                             <Table.Cell color="cyan.300">🏢 {app.warehouseName} ({app.location})</Table.Cell>
                             <Table.Cell color="whiteAlpha.700" fontSize="xs">VN: {app.taxId} • {app.reason}</Table.Cell>
                             <Table.Cell>
-                              <Badge colorPalette={app.status === 'approved' ? 'emerald' : 'amber'} variant="subtle">
-                                {app.status === 'approved' ? '✅ Onaylandı' : '⏳ Bekliyor'}
+                              <Badge colorPalette={app.status === 'approved' ? 'emerald' : app.status === 'rejected' ? 'red' : 'amber'} variant="subtle">
+                                {app.status === 'approved' ? '✅ Onaylandı (Satıcı)' : app.status === 'rejected' ? '❌ Reddedildi' : '⏳ Bekliyor (İstek)'}
                               </Badge>
                             </Table.Cell>
                             <Table.Cell>
                               {app.status === 'pending' ? (
-                                <Button
-                                  size="xs"
-                                  colorPalette="emerald"
-                                  variant="solid"
-                                  borderRadius="lg"
-                                  onClick={() => handleApproveApp(app.id)}
-                                >
-                                  <FiCheckCircle size={13} /> Onayla & Yetkilendir
-                                </Button>
+                                <HStack gap={2}>
+                                  <Button
+                                    size="xs"
+                                    colorPalette="emerald"
+                                    variant="solid"
+                                    borderRadius="lg"
+                                    onClick={() => handleApproveApp(app.id, app.email)}
+                                  >
+                                    <FiCheckCircle size={13} /> Onayla & Satıcı Yap
+                                  </Button>
+                                  <Button
+                                    size="xs"
+                                    colorPalette="red"
+                                    variant="subtle"
+                                    borderRadius="lg"
+                                    onClick={() => handleRejectApp(app.id, app.email)}
+                                  >
+                                    <FiXCircle size={13} /> Reddet
+                                  </Button>
+                                </HStack>
+                              ) : app.status === 'approved' ? (
+                                <Badge colorPalette="emerald" variant="solid" size="xs">Satıcı Yetkisi Aktif</Badge>
                               ) : (
-                                <Text color="emerald.400" fontSize="xs" fontWeight="bold">Yetki Tanımlandı</Text>
+                                <Badge colorPalette="red" variant="subtle" size="xs">Başvuru Reddedildi</Badge>
                               )}
                             </Table.Cell>
                           </Table.Row>
