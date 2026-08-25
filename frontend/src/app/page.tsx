@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { fetchCampaignsStart, updateStock } from '@/store/slices/campaignSlice';
 import { addToCart } from '@/store/slices/cartSlice';
-import { Box, Container, Heading, SimpleGrid, Grid, Text, Button, Badge, VStack, HStack } from '@chakra-ui/react';
+import { Box, Container, Heading, SimpleGrid, Grid, Text, Button, Badge, VStack, HStack, Spinner } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/CountdownTimer';
 import { showToast } from '@/components/Toast';
@@ -211,15 +211,7 @@ export default function Home() {
         {/* Loading */}
         {loading && (
           <VStack gap={4} py={20}>
-            <Box
-              w={12} h={12}
-              style={{
-                border: '3px solid rgba(124,58,237,0.3)',
-                borderTop: '3px solid #7c3aed',
-                borderRadius: '50%',
-                animation: 'spin 0.8s linear infinite',
-              }}
-            />
+            <Spinner size="xl" color="purple.400" />
             <Text color="whiteAlpha.600">Kampanyalar yükleniyor...</Text>
           </VStack>
         )}

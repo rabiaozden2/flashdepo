@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { registerStart } from '@/store/slices/authSlice';
-import { Box, Button, VStack, Text, HStack, Heading } from '@chakra-ui/react';
+import { Box, Button, VStack, Text, HStack, Heading, Input } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -124,15 +124,20 @@ export default function RegisterPage() {
         <VStack as="form" onSubmit={handleSubmit} gap={4} align="stretch">
           <Box>
             <Text fontSize="sm" color="whiteAlpha.700" mb={2} fontWeight="600">E-posta</Text>
-            <input
+            <Input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              onFocus={() => setFocused('email')}
-              onBlur={() => setFocused(null)}
               required
               placeholder="ornek@mail.com"
-              style={inputStyle('email')}
+              size="lg"
+              borderRadius="xl"
+              bg="whiteAlpha.100"
+              borderColor="whiteAlpha.200"
+              color="white"
+              _focus={{ borderColor: "pink.400", bg: "whiteAlpha.200", boxShadow: "0 0 20px rgba(236,72,153,0.3)" }}
+              _placeholder={{ color: "whiteAlpha.400" }}
+              h="52px"
             />
           </Box>
 
@@ -140,16 +145,21 @@ export default function RegisterPage() {
             <Text fontSize="sm" color="whiteAlpha.700" mb={2} fontWeight="600">
               Şifre <Text as="span" color="whiteAlpha.400" fontWeight="400">(Min. 6 karakter)</Text>
             </Text>
-            <input
+            <Input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              onFocus={() => setFocused('password')}
-              onBlur={() => setFocused(null)}
               required
               minLength={6}
               placeholder="••••••••"
-              style={inputStyle('password')}
+              size="lg"
+              borderRadius="xl"
+              bg="whiteAlpha.100"
+              borderColor="whiteAlpha.200"
+              color="white"
+              _focus={{ borderColor: "pink.400", bg: "whiteAlpha.200", boxShadow: "0 0 20px rgba(236,72,153,0.3)" }}
+              _placeholder={{ color: "whiteAlpha.400" }}
+              h="52px"
             />
           </Box>
 

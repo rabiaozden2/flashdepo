@@ -261,14 +261,25 @@ export default function AdminPage() {
               <Heading size="md" color="white">Yeni Kampanya Ekle</Heading>
               
               <Text color="whiteAlpha.700" fontSize="sm">Ürün Seçin</Text>
-              <select 
-                value={campProductId} 
-                onChange={(e) => setCampProductId(e.target.value)}
-                style={{ background: 'rgba(0,0,0,0.4)', color: 'white', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)' }}
+              <select
+                value={campProductId}
+                onChange={(e: any) => setCampProductId(e.target.value)}
+                style={{
+                  background: '#0f0c29',
+                  color: 'white',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  outline: 'none',
+                  fontSize: '14px',
+                  width: '100%',
+                }}
               >
-                <option value="">-- Ürün Seç --</option>
+                <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Ürün Seç --</option>
                 {products.map(p => (
-                  <option key={p.id} value={p.id}>{p.name} (Stok: {p.stock} - {p.warehouse ? p.warehouse.name : 'Bilinmiyor'})</option>
+                  <option key={p.id} value={p.id} style={{ background: '#0f0c29', color: 'white' }}>
+                    {p.name} (Stok: {p.stock} - {p.warehouse ? p.warehouse.name : 'Bilinmiyor'})
+                  </option>
                 ))}
               </select>
 
@@ -331,14 +342,23 @@ export default function AdminPage() {
               <Heading size="md" color="white">Yeni Ürün Ekle</Heading>
               
               <Text color="whiteAlpha.700" fontSize="sm">Depo Seçin</Text>
-              <select 
-                value={prodWarehouseId} 
-                onChange={(e) => setProdWarehouseId(e.target.value)}
-                style={{ background: 'rgba(0,0,0,0.4)', color: 'white', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.2)' }}
+              <select
+                value={prodWarehouseId}
+                onChange={(e: any) => setProdWarehouseId(e.target.value)}
+                style={{
+                  background: '#0f0c29',
+                  color: 'white',
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  outline: 'none',
+                  fontSize: '14px',
+                  width: '100%',
+                }}
               >
-                <option value="">-- Depo Seç --</option>
+                <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Depo Seç --</option>
                 {warehouses.map(w => (
-                  <option key={w.id} value={w.id}>{w.name}</option>
+                  <option key={w.id} value={w.id} style={{ background: '#0f0c29', color: 'white' }}>{w.name}</option>
                 ))}
               </select>
 

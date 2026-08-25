@@ -46,22 +46,9 @@ export default function OrdersPage() {
   if (!token || loading) return (
     <Box minH="100vh" display="flex" alignItems="center" justifyContent="center">
       <VStack gap={4}>
-        <Box
-          w={12} h={12}
-          style={{
-            border: '3px solid rgba(124,58,237,0.3)',
-            borderTop: '3px solid #7c3aed',
-            borderRadius: '50%',
-            animation: 'spin 0.8s linear infinite',
-          }}
-        />
+        <Spinner size="xl" color="purple.400" />
         <Text color="whiteAlpha.600">Siparişleriniz yükleniyor...</Text>
       </VStack>
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </Box>
   );
 

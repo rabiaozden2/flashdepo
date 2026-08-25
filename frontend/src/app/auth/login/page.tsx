@@ -121,29 +121,39 @@ export default function LoginPage() {
         <VStack as="form" onSubmit={handleSubmit} gap={4} align="stretch">
           <Box>
             <Text fontSize="sm" color="whiteAlpha.700" mb={2} fontWeight="600">E-posta</Text>
-            <input
+            <Input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              onFocus={() => setFocused('email')}
-              onBlur={() => setFocused(null)}
               required
               placeholder="ornek@mail.com"
-              style={inputStyle('email')}
+              size="lg"
+              borderRadius="xl"
+              bg="whiteAlpha.100"
+              borderColor="whiteAlpha.200"
+              color="white"
+              _focus={{ borderColor: "purple.400", bg: "whiteAlpha.200", boxShadow: "0 0 20px rgba(124,58,237,0.3)" }}
+              _placeholder={{ color: "whiteAlpha.400" }}
+              h="52px"
             />
           </Box>
 
           <Box>
             <Text fontSize="sm" color="whiteAlpha.700" mb={2} fontWeight="600">Şifre</Text>
-            <input
+            <Input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              onFocus={() => setFocused('password')}
-              onBlur={() => setFocused(null)}
               required
               placeholder="••••••••"
-              style={inputStyle('password')}
+              size="lg"
+              borderRadius="xl"
+              bg="whiteAlpha.100"
+              borderColor="whiteAlpha.200"
+              color="white"
+              _focus={{ borderColor: "purple.400", bg: "whiteAlpha.200", boxShadow: "0 0 20px rgba(124,58,237,0.3)" }}
+              _placeholder={{ color: "whiteAlpha.400" }}
+              h="52px"
             />
           </Box>
 
