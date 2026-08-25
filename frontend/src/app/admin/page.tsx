@@ -6,16 +6,17 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { showToast } from '@/components/Toast';
-import { FiTrash2, FiRefreshCw, FiPlus, FiZap, FiBox, FiTag, FiShoppingBag, FiLayers, FiShield, FiCheckCircle, FiClock, FiXCircle, FiPackage, FiBarChart2 } from 'react-icons/fi';
+import { FiTrash2, FiRefreshCw, FiPlus, FiZap, FiBox, FiTag, FiShoppingBag, FiLayers, FiShield, FiCheckCircle, FiClock, FiXCircle, FiPackage, FiBarChart2, FiBriefcase } from 'react-icons/fi';
 
 export default function AdminPage() {
   const router = useRouter();
   const { token, user } = useSelector((state: RootState) => state.auth);
-  const [tab, setTab] = useState<'campaigns' | 'products'>('campaigns');
+  const [tab, setTab] = useState<'campaigns' | 'products' | 'applications'>('campaigns');
 
   const [products, setProducts] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [applications, setApplications] = useState<any[]>([]);
 
   // Campaign Form State
   const [campProductId, setCampProductId] = useState('');
@@ -40,6 +41,10 @@ export default function AdminPage() {
       return;
     }
 
+    // Load manager applications from localStorage
+    const savedApps = JSON.parse(localStorage.getItem('manager_applications') || '[]');
+    setApplications(savedApps);
+
     // Fetch products
     fetch(`${API_URL}/api/products`)
       .then(res => res.json())
@@ -58,6 +63,13 @@ export default function AdminPage() {
 
     fetchCampaigns();
   }, [token, user, router, API_URL]);
+
+  const handleApproveApp = (appId: string) => {
+    const updated = applications.map(a => a.id === appId ? { ...a, status: 'approved' } : a);
+    setApplications(updated);
+    localStorage.setItem('manager_applications', JSON.stringify(updated));
+    showToast('Satıcı / Depo Yöneticisi başvurusu onaylandı! Kullanıcı yetkilendirildi.', 'success');
+  };
 
   const fetchCampaigns = async () => {
     try {
@@ -294,7 +306,7 @@ export default function AdminPage() {
         </SimpleGrid>
 
         {/* Tab Selector */}
-        <HStack gap={4} mb={8}>
+        <HStack gap={4} mb={8} flexWrap="wrap">
           <Button 
             size="lg"
             variant={tab === 'campaigns' ? 'solid' : 'subtle'} 
@@ -312,6 +324,15 @@ export default function AdminPage() {
             onClick={() => setTab('products')}
           >
             <FiBox size={18} /> Ürün & Envanter Yönetimi
+          </Button>
+          <Button 
+            size="lg"
+            variant={tab === 'applications' ? 'solid' : 'subtle'} 
+            colorPalette="emerald" 
+            borderRadius="xl"
+            onClick={() => setTab('applications')}
+          >
+            <FiBriefcase size={18} /> Satıcı / Depo Yöneticisi Başvuruları ({applications.filter(a => a.status === 'pending').length})
           </Button>
         </HStack>
 
@@ -535,7 +556,7 @@ export default function AdminPage() {
               </Card.Root>
             </SimpleGrid>
           </VStack>
-        ) : (
+        ) : tab === 'products' ? (
           <VStack align="stretch" gap={8}>
             {/* Create Product Card */}
             <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
@@ -690,6 +711,80 @@ export default function AdminPage() {
                     </Table.Body>
                   </Table.Root>
                 </Box>
+              </Card.Body>
+            </Card.Root>
+          </VStack>
+        ) : (
+          <VStack align="stretch" gap={8}>
+            {/* Manager Applications Card */}
+            <Card.Root bg="whiteAlpha.100" borderColor="emerald.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+              <Card.Header p={6} pb={2}>
+                <HStack justify="space-between">
+                  <Box>
+                    <Card.Title color="white" fontSize="xl" fontWeight="bold">
+                      <HStack gap={2}>
+                        <FiBriefcase color="#34d399" size={20} />
+                        <Text>Satıcı & Depo Yöneticisi Başvuruları</Text>
+                      </HStack>
+                    </Card.Title>
+                    <Card.Description color="whiteAlpha.600" fontSize="sm">
+                      Depo açmak ve satıcı olmak isteyen kullanıcıların başvurularını inceleyip yetkilendirin.
+                    </Card.Description>
+                  </Box>
+                  <Badge colorPalette="emerald" variant="solid" borderRadius="full" px={3} py={1}>
+                    {applications.length} Başvuru
+                  </Badge>
+                </HStack>
+              </Card.Header>
+              <Card.Body p={6}>
+                {applications.length === 0 ? (
+                  <Text color="whiteAlpha.500" fontSize="sm" py={8} textAlign="center">
+                    Henüz yeni bir satıcı / depo yöneticisi başvurusu bulunmuyor.
+                  </Text>
+                ) : (
+                  <Box overflowX="auto">
+                    <Table.Root size="md" variant="line">
+                      <Table.Header>
+                        <Table.Row borderBottom="1px solid" borderColor="whiteAlpha.200">
+                          <Table.ColumnHeader color="whiteAlpha.600">Aday e-Posta</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">İstenen Depo Adı & Konum</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">Vergi No / Not</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">Durum</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">İşlem</Table.ColumnHeader>
+                        </Table.Row>
+                      </Table.Header>
+                      <Table.Body>
+                        {applications.map(app => (
+                          <Table.Row key={app.id} borderBottom="1px solid" borderColor="whiteAlpha.100">
+                            <Table.Cell color="white" fontWeight="bold">{app.email}</Table.Cell>
+                            <Table.Cell color="cyan.300">🏢 {app.warehouseName} ({app.location})</Table.Cell>
+                            <Table.Cell color="whiteAlpha.700" fontSize="xs">VN: {app.taxId} • {app.reason}</Table.Cell>
+                            <Table.Cell>
+                              <Badge colorPalette={app.status === 'approved' ? 'emerald' : 'amber'} variant="subtle">
+                                {app.status === 'approved' ? '✅ Onaylandı' : '⏳ Bekliyor'}
+                              </Badge>
+                            </Table.Cell>
+                            <Table.Cell>
+                              {app.status === 'pending' ? (
+                                <Button
+                                  size="xs"
+                                  colorPalette="emerald"
+                                  variant="solid"
+                                  borderRadius="lg"
+                                  onClick={() => handleApproveApp(app.id)}
+                                >
+                                  <FiCheckCircle size={13} /> Onayla & Yetkilendir
+                                </Button>
+                              ) : (
+                                <Text color="emerald.400" fontSize="xs" fontWeight="bold">Yetki Tanımlandı</Text>
+                              )}
+                            </Table.Cell>
+                          </Table.Row>
+                        ))}
+                      </Table.Body>
+                    </Table.Root>
+                  </Box>
+                )}
               </Card.Body>
             </Card.Root>
           </VStack>

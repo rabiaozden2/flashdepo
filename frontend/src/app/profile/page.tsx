@@ -1,24 +1,39 @@
 'use client';
 
-import { Box, Container, Heading, VStack, HStack, Text, Button, Badge } from '@chakra-ui/react';
+import { Box, Container, Heading, VStack, HStack, Text, Button, Badge, Input, Card } from '@chakra-ui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { logout } from '@/store/slices/authSlice';
 import { clearCart } from '@/store/slices/cartSlice';
-import { useEffect } from 'react';
-import { FiUser, FiShield, FiPackage, FiLogOut, FiCheckCircle } from 'react-icons/fi';
+import { useEffect, useState } from 'react';
+import { FiUser, FiShield, FiPackage, FiLogOut, FiCheckCircle, FiBriefcase, FiSend, FiClock } from 'react-icons/fi';
+import { showToast } from '@/components/Toast';
 
 export default function ProfilePage() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { token, user } = useSelector((state: RootState) => state.auth);
 
+  // Application form state
+  const [showAppForm, setShowAppForm] = useState(false);
+  const [appWarehouse, setAppWarehouse] = useState('');
+  const [appLocation, setAppLocation] = useState('');
+  const [appTaxId, setAppTaxId] = useState('');
+  const [appReason, setAppReason] = useState('');
+  const [hasApplied, setHasApplied] = useState(false);
+
   useEffect(() => {
     if (!token) {
       router.push('/auth/login');
     }
-  }, [token, router]);
+    // Check if user already applied
+    if (user?.email) {
+      const savedApps = JSON.parse(localStorage.getItem('manager_applications') || '[]');
+      const userApp = savedApps.find((a: any) => a.email === user.email);
+      if (userApp) setHasApplied(true);
+    }
+  }, [token, router, user]);
 
   if (!user) return null;
 
@@ -28,6 +43,32 @@ export default function ProfilePage() {
     dispatch(logout());
     dispatch(clearCart());
     router.push('/auth/login');
+  };
+
+  const handleApplyManager = () => {
+    if (!appWarehouse || !appLocation || !appTaxId) {
+      showToast('Lütfen tüm zorunlu alanları doldurun.', 'error');
+      return;
+    }
+    const newApp = {
+      id: Date.now().toString(),
+      email: user.email,
+      userId: user.id,
+      warehouseName: appWarehouse,
+      location: appLocation,
+      taxId: appTaxId,
+      reason: appReason || 'Depo Yönetimi & Satış',
+      status: 'pending',
+      date: new Date().toLocaleDateString('tr-TR'),
+    };
+
+    const savedApps = JSON.parse(localStorage.getItem('manager_applications') || '[]');
+    savedApps.push(newApp);
+    localStorage.setItem('manager_applications', JSON.stringify(savedApps));
+
+    setHasApplied(true);
+    setShowAppForm(false);
+    showToast('Depo Yöneticisi başvurunuz alındı! Admin onayının ardından hesabınız yetkilendirilecektir.', 'success');
   };
 
   const getRoleBadge = (role: string) => {
@@ -146,8 +187,116 @@ export default function ProfilePage() {
               </Text>
             </Box>
 
+            {/* Depo Yöneticisi Başvuru Kartı (Müşteri Yetkisinde Olanlar İçin) */}
+            {user.role === 'customer' && (
+              <Box w="full" p={5} bg="blackAlpha.400" borderRadius="2xl" border="1px solid rgba(6,182,212,0.3)">
+                <VStack align="stretch" gap={3}>
+                  <HStack justify="space-between">
+                    <HStack gap={2}>
+                      <FiBriefcase color="#38bdf8" size={20} />
+                      <Text color="white" fontWeight="bold" fontSize="md">Depo Yöneticisi Olmak İster Mısınız?</Text>
+                    </HStack>
+                    {hasApplied && (
+                      <Badge colorPalette="amber" variant="subtle">
+                        <FiClock size={11} /> Bekliyor
+                      </Badge>
+                    )}
+                  </HStack>
+
+                  {hasApplied ? (
+                    <Box p={3} bg="amber.500/10" borderRadius="xl" border="1px solid rgba(245,158,11,0.3)">
+                      <Text color="amber.300" fontSize="xs" fontWeight="600">
+                        ⏳ Depo Yöneticisi başvurunuz alındı. Sistem admininin incelemesinin ardından hesabınıza depo yönetim yetkisi tanımlanacaktır.
+                      </Text>
+                    </Box>
+                  ) : (
+                    <>
+                      <Text color="whiteAlpha.600" fontSize="xs">
+                        Kendi deponuzun stoklarını eklemek, anlık flash sale indirimi tanımlamak ve satıcı olmak için başvuru yapın.
+                      </Text>
+
+                      {!showAppForm ? (
+                        <Button
+                          size="md"
+                          colorPalette="cyan"
+                          variant="solid"
+                          borderRadius="xl"
+                          onClick={() => setShowAppForm(true)}
+                        >
+                          <FiBriefcase size={16} /> Satıcı & Depo Yöneticisi Başvurusu Yap
+                        </Button>
+                      ) : (
+                        <VStack align="stretch" gap={3} mt={2} p={4} bg="blackAlpha.600" borderRadius="xl">
+                          <Input
+                            placeholder="Depo / İşletme Adı (Örn: Kadıköy Lojistik Deposu)"
+                            size="md"
+                            bg="blackAlpha.500"
+                            borderColor="whiteAlpha.200"
+                            color="white"
+                            borderRadius="lg"
+                            value={appWarehouse}
+                            onChange={e => setAppWarehouse(e.target.value)}
+                          />
+                          <Input
+                            placeholder="Şehir / Konum (Örn: İstanbul)"
+                            size="md"
+                            bg="blackAlpha.500"
+                            borderColor="whiteAlpha.200"
+                            color="white"
+                            borderRadius="lg"
+                            value={appLocation}
+                            onChange={e => setAppLocation(e.target.value)}
+                          />
+                          <Input
+                            placeholder="Vergi Kimlik No / İşletme No (Örn: 9876543210)"
+                            size="md"
+                            bg="blackAlpha.500"
+                            borderColor="whiteAlpha.200"
+                            color="white"
+                            borderRadius="lg"
+                            value={appTaxId}
+                            onChange={e => setAppTaxId(e.target.value)}
+                          />
+                          <Input
+                            placeholder="Açıklama / Ürün Türü (İsteğe bağlı)"
+                            size="md"
+                            bg="blackAlpha.500"
+                            borderColor="whiteAlpha.200"
+                            color="white"
+                            borderRadius="lg"
+                            value={appReason}
+                            onChange={e => setAppReason(e.target.value)}
+                          />
+                          <HStack gap={2} pt={2}>
+                            <Button
+                              flex={1}
+                              size="md"
+                              colorPalette="cyan"
+                              borderRadius="lg"
+                              onClick={handleApplyManager}
+                            >
+                              <FiSend size={15} /> Başvuruyu Gönder
+                            </Button>
+                            <Button
+                              size="md"
+                              variant="subtle"
+                              colorPalette="gray"
+                              borderRadius="lg"
+                              onClick={() => setShowAppForm(false)}
+                            >
+                              İptal
+                            </Button>
+                          </HStack>
+                        </VStack>
+                      )}
+                    </>
+                  )}
+                </VStack>
+              </Box>
+            )}
+
             {/* System Info Cards */}
-            <VStack w="full" gap={3} align="stretch" mt={2}>
+            <VStack w="full" gap={3} align="stretch">
               <Box p={4} bg="rgba(0,0,0,0.3)" borderRadius="16px" border="1px solid rgba(255,255,255,0.05)">
                 <HStack justify="space-between">
                   <HStack gap={2}>
@@ -157,22 +306,10 @@ export default function ProfilePage() {
                   <Text fontSize="sm" fontWeight="700" color="green.400">Aktif & Doğrulandı</Text>
                 </HStack>
               </Box>
-
-              <Box p={4} bg="rgba(0,0,0,0.3)" borderRadius="16px" border="1px solid rgba(255,255,255,0.05)">
-                <HStack justify="space-between">
-                  <HStack gap={2}>
-                    <FiPackage color="#a855f7" />
-                    <Text fontSize="sm" color="whiteAlpha.800">Kullanıcı Kimliği (ID):</Text>
-                  </HStack>
-                  <Text fontSize="xs" fontFamily="mono" color="whiteAlpha.600">
-                    {user.id ? `${user.id.substring(0, 18)}...` : 'Aktif Oturum'}
-                  </Text>
-                </HStack>
-              </Box>
             </VStack>
 
             {/* Action Buttons */}
-            <VStack w="full" gap={3} mt={4}>
+            <VStack w="full" gap={3} mt={2}>
               {user.role === 'admin' && (
                 <Button
                   w="full"

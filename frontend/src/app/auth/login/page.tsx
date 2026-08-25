@@ -10,8 +10,9 @@ import Link from 'next/link';
 import { FiShield, FiBriefcase, FiUser, FiZap } from 'react-icons/fi';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [portalRole, setPortalRole] = useState<'customer' | 'warehouse_manager' | 'admin'>('customer');
+  const [email, setEmail] = useState('customer@flashdepo.com');
+  const [password, setPassword] = useState('customer123');
   const [focused, setFocused] = useState<string | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -20,6 +21,20 @@ export default function LoginPage() {
   useEffect(() => {
     if (token) router.push('/');
   }, [token, router]);
+
+  const handleRoleSwitch = (role: 'customer' | 'warehouse_manager' | 'admin') => {
+    setPortalRole(role);
+    if (role === 'customer') {
+      setEmail('customer@flashdepo.com');
+      setPassword('customer123');
+    } else if (role === 'warehouse_manager') {
+      setEmail('manager1@flashdepo.com');
+      setPassword('manager123');
+    } else {
+      setEmail('admin@flashdepo.com');
+      setPassword('admin123');
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,20 +46,6 @@ export default function LoginPage() {
     setPassword(demoPass);
   };
 
-  const inputStyle = (name: string) => ({
-    background: focused === name ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.05)',
-    border: `1px solid ${focused === name ? 'rgba(124,58,237,0.6)' : 'rgba(255,255,255,0.1)'}`,
-    borderRadius: '12px',
-    color: 'white',
-    height: '52px',
-    fontSize: '15px',
-    paddingLeft: '16px',
-    transition: 'all 0.3s ease',
-    outline: 'none',
-    boxShadow: focused === name ? '0 0 20px rgba(124,58,237,0.2)' : 'none',
-    width: '100%',
-  });
-
   return (
     <Box
       minH="100vh"
@@ -54,38 +55,65 @@ export default function LoginPage() {
       position="relative"
       zIndex={1}
       px={4}
+      py={10}
     >
       <Box
         w="full"
-        maxW="420px"
+        maxW="440px"
         style={{
           background: 'rgba(255,255,255,0.04)',
           backdropFilter: 'blur(30px)',
           WebkitBackdropFilter: 'blur(30px)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '28px',
-          padding: '48px 40px',
+          padding: '40px 32px',
           boxShadow: '0 32px 80px rgba(0,0,0,0.4)',
         }}
       >
+        {/* Role Portal Selection Tabs */}
+        <VStack gap={3} mb={6}>
+          <Text fontSize="xs" color="whiteAlpha.500" fontWeight="700" textTransform="uppercase" letterSpacing="1px">
+            Giriş Yapılacak Portalı Seçin
+          </Text>
+          <HStack gap={1.5} w="full">
+            <Button
+              flex={1}
+              size="xs"
+              colorPalette="emerald"
+              variant={portalRole === 'customer' ? 'solid' : 'subtle'}
+              borderRadius="xl"
+              onClick={() => handleRoleSwitch('customer')}
+              py={2.5}
+            >
+              <FiUser size={12} /> Müşteri
+            </Button>
+            <Button
+              flex={1}
+              size="xs"
+              colorPalette="cyan"
+              variant={portalRole === 'warehouse_manager' ? 'solid' : 'subtle'}
+              borderRadius="xl"
+              onClick={() => handleRoleSwitch('warehouse_manager')}
+              py={2.5}
+            >
+              <FiBriefcase size={12} /> Depo Yön.
+            </Button>
+            <Button
+              flex={1}
+              size="xs"
+              colorPalette="pink"
+              variant={portalRole === 'admin' ? 'solid' : 'subtle'}
+              borderRadius="xl"
+              onClick={() => handleRoleSwitch('admin')}
+              py={2.5}
+            >
+              <FiShield size={12} /> Admin
+            </Button>
+          </HStack>
+        </VStack>
+
         {/* Header */}
-        <VStack gap={2} mb={8}>
-          <Box
-            mb={3}
-            style={{
-              width: '64px',
-              height: '64px',
-              background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
-              borderRadius: '18px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '28px',
-              boxShadow: '0 8px 24px rgba(124,58,237,0.5)',
-            }}
-          >
-            ⚡
-          </Box>
+        <VStack gap={2} mb={6}>
           <Heading
             size="xl"
             fontWeight="900"
@@ -96,10 +124,14 @@ export default function LoginPage() {
               backgroundClip: 'text',
             }}
           >
-            Hoş Geldin
+            {portalRole === 'admin' ? 'Admin Girişi' : portalRole === 'warehouse_manager' ? 'Depo Yöneticisi Girişi' : 'Müşteri Girişi'}
           </Heading>
-          <Text color="whiteAlpha.500" fontSize="sm" textAlign="center">
-            Hesabına giriş yap ve fırsatları yakala
+          <Text color="whiteAlpha.600" fontSize="xs" textAlign="center" px={2}>
+            {portalRole === 'admin'
+              ? 'Tüm sistem verilerini, depoları ve satışları yönetmek için giriş yapın.'
+              : portalRole === 'warehouse_manager'
+              ? 'Kendi deponuzun stoklarını ve ürünlerini yönetmek için giriş yapın.'
+              : 'Aktif flash sale kampanyalarını inceleyin ve anlık sipariş oluşturun.'}
           </Text>
         </VStack>
 
