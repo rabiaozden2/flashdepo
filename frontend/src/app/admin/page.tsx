@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { showToast } from '@/components/Toast';
-import { FiTrash2, FiRefreshCw, FiPlus, FiZap, FiBox, FiTag, FiShoppingBag, FiLayers } from 'react-icons/fi';
+import { FiTrash2, FiRefreshCw, FiPlus, FiZap, FiBox, FiTag, FiShoppingBag, FiLayers, FiShield, FiCheckCircle, FiClock, FiXCircle, FiPackage, FiBarChart2 } from 'react-icons/fi';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -222,8 +222,11 @@ export default function AdminPage() {
         {/* Header section */}
         <VStack align="start" gap={3} mb={8}>
           <HStack gap={3}>
-            <Badge colorPalette="purple" variant="solid" size="lg" borderRadius="full" px={3} py={1}>
-              👑 Admin Kontrol Paneli
+            <Badge colorPalette="pink" variant="subtle" size="lg" borderRadius="full" px={3} py={1}>
+              <HStack gap={1.5} as="span">
+                <FiShield size={14} />
+                <Text as="span">Admin Kontrol Paneli</Text>
+              </HStack>
             </Badge>
             <Badge colorPalette="emerald" variant="subtle" size="lg" borderRadius="full" px={3} py={1}>
               ● Sistem Aktif
@@ -319,7 +322,10 @@ export default function AdminPage() {
             <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
               <Card.Header p={6} pb={0}>
                 <Card.Title color="white" fontSize="xl" fontWeight="bold">
-                  ⚡️ Yeni Flash Sale Kampanyası Oluştur
+                  <HStack gap={2}>
+                    <FiZap color="#a855f7" size={20} />
+                    <Text>Yeni Flash Sale Kampanyası Oluştur</Text>
+                  </HStack>
                 </Card.Title>
                 <Card.Description color="whiteAlpha.600" fontSize="sm">
                   Depodaki mevcut bir ürünü seçerek anlık indirim oranı ve stok kotası tanımlayın.
@@ -434,7 +440,12 @@ export default function AdminPage() {
               <Card.Root bg="whiteAlpha.100" borderColor="emerald.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
                 <Card.Header p={5} pb={2}>
                   <HStack justify="space-between">
-                    <Card.Title color="emerald.300" fontSize="lg" fontWeight="bold">🟢 Aktif Kampanyalar</Card.Title>
+                    <Card.Title color="emerald.300" fontSize="lg" fontWeight="bold">
+                      <HStack gap={2}>
+                        <FiCheckCircle color="#34d399" size={18} />
+                        <Text>Aktif Kampanyalar</Text>
+                      </HStack>
+                    </Card.Title>
                     <Badge colorPalette="emerald" variant="solid" borderRadius="full">{activeCampaigns.length}</Badge>
                   </HStack>
                 </Card.Header>
@@ -460,7 +471,12 @@ export default function AdminPage() {
               <Card.Root bg="whiteAlpha.100" borderColor="amber.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
                 <Card.Header p={5} pb={2}>
                   <HStack justify="space-between">
-                    <Card.Title color="amber.300" fontSize="lg" fontWeight="bold">⏳ Yaklaşan Kampanyalar</Card.Title>
+                    <Card.Title color="amber.300" fontSize="lg" fontWeight="bold">
+                      <HStack gap={2}>
+                        <FiClock color="#fbbf24" size={18} />
+                        <Text>Yaklaşan Kampanyalar</Text>
+                      </HStack>
+                    </Card.Title>
                     <Badge colorPalette="amber" variant="solid" borderRadius="full">{upcomingCampaigns.length}</Badge>
                   </HStack>
                 </Card.Header>
@@ -486,7 +502,12 @@ export default function AdminPage() {
               <Card.Root bg="whiteAlpha.100" borderColor="red.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
                 <Card.Header p={5} pb={2}>
                   <HStack justify="space-between">
-                    <Card.Title color="red.300" fontSize="lg" fontWeight="bold">🔴 Biten Kampanyalar</Card.Title>
+                    <Card.Title color="red.300" fontSize="lg" fontWeight="bold">
+                      <HStack gap={2}>
+                        <FiXCircle color="#f87171" size={18} />
+                        <Text>Biten Kampanyalar</Text>
+                      </HStack>
+                    </Card.Title>
                     <Badge colorPalette="red" variant="solid" borderRadius="full">{expiredCampaigns.length}</Badge>
                   </HStack>
                 </Card.Header>

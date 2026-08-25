@@ -177,16 +177,12 @@ export default function ProfilePage() {
                 <Button
                   w="full"
                   size="lg"
+                  colorPalette="pink"
+                  variant="solid"
+                  borderRadius="xl"
                   onClick={() => router.push('/admin')}
-                  style={{
-                    background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
-                    color: 'white',
-                    fontWeight: '800',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 24px rgba(124,58,237,0.4)',
-                  }}
                 >
-                  👑 Admin Paneline Git
+                  <FiShield size={16} /> Admin Paneline Git
                 </Button>
               )}
 
