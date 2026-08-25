@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Container, Heading, VStack, Text, Badge, HStack, Spinner, Image, SimpleGrid, Grid, Button } from '@chakra-ui/react';
+import { Box, Container, Heading, VStack, Text, Badge, HStack, Spinner, Image, SimpleGrid, Grid, Button, Card } from '@chakra-ui/react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
@@ -120,116 +120,120 @@ export default function OrdersPage() {
               }
 
               return (
-                <Box
+                <Card.Root
                   key={order.id}
-                  p={{ base: 5, md: 8 }}
-                  style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    backdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: '24px',
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                  }}
-                  _hover={{
-                    transform: 'translateY(-4px)',
-                    boxShadow: '0 12px 40px rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(255,255,255,0.15)',
-                  }}
+                  bg="whiteAlpha.50"
+                  borderColor="whiteAlpha.100"
+                  borderWidth="1px"
+                  borderRadius="3xl"
+                  overflow="hidden"
+                  backdropFilter="blur(20px)"
+                  shadow="lg"
+                  transition="all 0.3s"
+                  _hover={{ transform: 'translateY(-4px)', shadow: '2xl', borderColor: 'whiteAlpha.300' }}
                 >
-                  <Grid templateColumns={{ base: "1fr", md: "150px 1fr" }} gap={8} alignItems="center">
-                    
-                    {/* Product Image */}
-                    <Box 
-                      w="100%" h="150px" 
-                      bg="rgba(0,0,0,0.5)" 
-                      borderRadius="xl" 
-                      overflow="hidden"
-                      display="flex" alignItems="center" justifyContent="center"
-                      border="1px solid rgba(255,255,255,0.05)"
-                    >
-                      {product?.image_url ? (
-                        <Image src={product.image_url} alt={product.name} objectFit="contain" w="100%" h="100%" p={4} />
-                      ) : (
-                        <Text color="whiteAlpha.300" fontSize="sm">Görsel Yok</Text>
-                      )}
-                    </Box>
+                  <Card.Body p={{ base: 5, md: 8 }}>
+                    <Grid templateColumns={{ base: "1fr", md: "150px 1fr" }} gap={8} alignItems="center">
+                      
+                      {/* Product Image */}
+                      <Box 
+                        w="100%" h="150px" 
+                        bg="blackAlpha.500" 
+                        borderRadius="xl" 
+                        overflow="hidden"
+                        display="flex" alignItems="center" justifyContent="center"
+                        border="1px solid" borderColor="whiteAlpha.100"
+                      >
+                        {product?.image_url ? (
+                          <Image src={product.image_url} alt={product.name} objectFit="contain" w="100%" h="100%" p={4} />
+                        ) : (
+                          <Text color="whiteAlpha.300" fontSize="sm">Görsel Yok</Text>
+                        )}
+                      </Box>
 
-                    {/* Order Details */}
-                    <Box w="100%">
-                      <HStack justify="space-between" align="flex-start" mb={2} flexWrap="wrap" gap={4}>
-                        <Box>
-                          <Badge mb={3} bg="whiteAlpha.200" color="whiteAlpha.800" borderRadius="full" px={3} py={1}>
-                            Sipariş Tarihi: {date}
-                          </Badge>
-                          <Heading size="lg" color="white" fontWeight="800" mb={2}>
-                            {product?.name || 'Bilinmeyen Ürün'}
-                          </Heading>
-                          <Text color="whiteAlpha.600" fontSize="md">
-                            Sipariş No: <Text as="span" fontFamily="mono" color="whiteAlpha.800">#{order.id.split('-')[0].toUpperCase()}</Text>
-                          </Text>
-                        </Box>
-                        
-                        <Box textAlign={{ base: "left", md: "right" }}>
-                          <Box 
-                            px={4} py={2} 
-                            borderRadius="xl" 
-                            style={{ background: statusGradient, border: `1px solid ${statusBorder}` }}
-                          >
-                            <Text color={statusColor} fontWeight="800" fontSize="sm" letterSpacing="1px" textTransform="uppercase">
+                      {/* Order Details */}
+                      <Box w="100%">
+                        <HStack justify="space-between" align="flex-start" mb={2} flexWrap="wrap" gap={4}>
+                          <Box>
+                            <Badge colorPalette={order.status === 'completed' ? 'emerald' : order.status === 'pending' ? 'amber' : 'red'} variant="subtle" size="md" mb={2}>
                               {statusText}
+                            </Badge>
+                            <Heading size="lg" color="white" fontWeight="800">
+                              {product?.name || 'FlashSale Ürünü'}
+                            </Heading>
+                          </Box>
+
+                          <Box textAlign="right">
+                            <Text fontSize="xs" color="whiteAlpha.400" mb={1}>Sipariş No</Text>
+                            <Text fontSize="xs" fontFamily="mono" color="whiteAlpha.800" bg="blackAlpha.400" px={3} py={1.5} borderRadius="lg" border="1px solid" borderColor="whiteAlpha.100">
+                              #{order.id.substring(0, 8)}
                             </Text>
                           </Box>
-                        </Box>
-                      </HStack>
+                        </HStack>
 
-                      <HStack justify="space-between" align="flex-end" mt={6} pt={6} borderTop="1px solid rgba(255,255,255,0.05)">
-                        <Box>
-                          <Text fontSize="xs" color="whiteAlpha.500" mb={1} textTransform="uppercase" letterSpacing="1px">Adet</Text>
-                          <Text fontSize="xl" fontWeight="700" color="white">{order.quantity}x</Text>
-                        </Box>
-                        <Box textAlign="right">
-                          <Text fontSize="xs" color="whiteAlpha.500" mb={1} textTransform="uppercase" letterSpacing="1px">Toplam Tutar</Text>
-                          <Text fontSize="3xl" fontWeight="900" color="white">
-                            ₺{order.total_price.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
-                          </Text>
-                        </Box>
-                      </HStack>
+                        <HStack gap={6} my={3} flexWrap="wrap">
+                          <Box>
+                            <Text fontSize="xs" color="whiteAlpha.400" mb={1}>Sipariş Tarihi</Text>
+                            <Text fontSize="sm" color="whiteAlpha.800" fontWeight="500">{date}</Text>
+                          </Box>
 
-                      {/* Progress Tracker Line */}
-                      {order.status !== 'failed' && order.status !== 'cancelled' && (
-                        <Box mt={8} position="relative">
-                          <Box position="absolute" top="10px" left="0" right="0" height="2px" bg="whiteAlpha.100" zIndex={0} />
-                          <Box 
-                            position="absolute" top="10px" left="0" 
-                            height="2px" zIndex={0}
-                            style={{
-                              background: 'linear-gradient(90deg, #ec4899, #8b5cf6)',
-                              width: order.status === 'completed' ? '100%' : '50%',
-                              transition: 'width 1s ease-in-out'
-                            }} 
-                          />
-                          
-                          <HStack justify="space-between" position="relative" zIndex={1}>
-                            <VStack gap={2}>
-                              <Box w={5} h={5} borderRadius="full" bg="#ec4899" boxShadow="0 0 10px rgba(236,72,153,0.5)" />
-                              <Text fontSize="xs" color="whiteAlpha.800" fontWeight="600">Sipariş Alındı</Text>
-                            </VStack>
+                          <Box>
+                            <Text fontSize="xs" color="whiteAlpha.400" mb={1}>Çıkış Deposu</Text>
+                            <Text fontSize="sm" color="whiteAlpha.800" fontWeight="500">
+                              🏢 {product?.warehouse?.name || 'Merkez Lojistik Deposu'}
+                            </Text>
+                          </Box>
+                        </HStack>
+
+                        <HStack justify="space-between" align="flex-end" mt={6} pt={6} borderTop="1px solid" borderColor="whiteAlpha.100">
+                          <Box>
+                            <Text fontSize="xs" color="whiteAlpha.500" mb={1} textTransform="uppercase" letterSpacing="1px">Adet</Text>
+                            <Text fontSize="xl" fontWeight="700" color="white">{order.quantity}x</Text>
+                          </Box>
+                          <Box textAlign="right">
+                            <Text fontSize="xs" color="whiteAlpha.500" mb={1} textTransform="uppercase" letterSpacing="1px">Toplam Tutar</Text>
+                            <Text fontSize="3xl" fontWeight="900" color="white">
+                              ₺{order.total_price.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
+                            </Text>
+                          </Box>
+                        </HStack>
+
+                        {/* Progress Tracker Line */}
+                        {order.status !== 'failed' && order.status !== 'cancelled' && (
+                          <Box mt={8} position="relative">
+                            <Box position="absolute" top="10px" left="0" right="0" height="2px" bg="whiteAlpha.100" zIndex={0} />
+                            <Box 
+                              position="absolute" top="10px" left="0" 
+                              height="2px" zIndex={0}
+                              style={{
+                                background: 'linear-gradient(90deg, #ec4899, #8b5cf6)',
+                                width: order.status === 'completed' ? '100%' : '50%',
+                                transition: 'width 1s ease-in-out'
+                              }} 
+                            />
                             
-                            <VStack gap={2}>
-                              <Box w={5} h={5} borderRadius="full" bg={order.status === 'completed' || order.status === 'pending' ? '#c084fc' : 'gray.700'} boxShadow={order.status === 'completed' || order.status === 'pending' ? "0 0 10px rgba(192,132,252,0.5)" : "none"} />
-                              <Text fontSize="xs" color={order.status === 'completed' || order.status === 'pending' ? 'whiteAlpha.800' : 'whiteAlpha.400'} fontWeight="600">Hazırlanıyor</Text>
-                            </VStack>
+                            <HStack justify="space-between" position="relative" zIndex={1}>
+                              <VStack gap={2}>
+                                <Box w={5} h={5} borderRadius="full" bg="#ec4899" boxShadow="0 0 10px rgba(236,72,153,0.5)" />
+                                <Text fontSize="xs" color="whiteAlpha.800" fontWeight="600">Sipariş Alındı</Text>
+                              </VStack>
+                              
+                              <VStack gap={2}>
+                                <Box w={5} h={5} borderRadius="full" bg={order.status === 'completed' || order.status === 'pending' ? '#c084fc' : 'gray.700'} boxShadow={order.status === 'completed' || order.status === 'pending' ? "0 0 10px rgba(192,132,252,0.5)" : "none"} />
+                                <Text fontSize="xs" color={order.status === 'completed' || order.status === 'pending' ? 'whiteAlpha.800' : 'whiteAlpha.400'} fontWeight="600">Hazırlanıyor</Text>
+                              </VStack>
 
-                            <VStack gap={2}>
-                              <Box w={5} h={5} borderRadius="full" bg={order.status === 'completed' ? '#8b5cf6' : 'gray.700'} boxShadow={order.status === 'completed' ? "0 0 10px rgba(139,92,246,0.5)" : "none"} />
-                              <Text fontSize="xs" color={order.status === 'completed' ? 'whiteAlpha.800' : 'whiteAlpha.400'} fontWeight="600">Kargoya Verildi</Text>
-                            </VStack>
-                          </HStack>
-                        </Box>
-                      )}
-                    </Box>
-                  </Grid>
-                </Box>
+                              <VStack gap={2}>
+                                <Box w={5} h={5} borderRadius="full" bg={order.status === 'completed' ? '#8b5cf6' : 'gray.700'} boxShadow={order.status === 'completed' ? "0 0 10px rgba(139,92,246,0.5)" : "none"} />
+                                <Text fontSize="xs" color={order.status === 'completed' ? 'whiteAlpha.800' : 'whiteAlpha.400'} fontWeight="600">Kargoya Verildi</Text>
+                              </VStack>
+                            </HStack>
+                          </Box>
+                        )}
+                      </Box>
+                    </Grid>
+                  </Card.Body>
+                </Card.Root>
               );
             })}
           </SimpleGrid>

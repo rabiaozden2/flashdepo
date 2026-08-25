@@ -5,10 +5,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { fetchCampaignsStart, updateStock } from '@/store/slices/campaignSlice';
 import { addToCart } from '@/store/slices/cartSlice';
-import { Box, Container, Heading, SimpleGrid, Grid, Text, Button, Badge, VStack, HStack, Spinner } from '@chakra-ui/react';
+import { Box, Container, Heading, SimpleGrid, Grid, Text, Button, Badge, VStack, HStack, Spinner, Card } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/CountdownTimer';
 import { showToast } from '@/components/Toast';
+import { FiTrash2 } from 'react-icons/fi';
 
 const CARD_GRADIENTS = [
   'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.2))',
@@ -241,202 +242,104 @@ export default function Home() {
               const isSuccess = successId === camp.id;
 
               return (
-                <Box
+                <Card.Root
                   key={camp.id}
-                  style={{
-                    background: isOutOfStock
-                      ? 'rgba(255,255,255,0.03)'
-                      : CARD_GRADIENTS[idx],
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    border: `1px solid ${isOutOfStock ? 'rgba(255,255,255,0.06)' : CARD_BORDERS[idx]}`,
-                    borderRadius: '24px',
-                    padding: '28px',
-                    boxShadow: isOutOfStock ? 'none' : CARD_GLOWS[idx],
-                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                    opacity: isOutOfStock ? 0.6 : 1,
-                    cursor: 'default',
-                  }}
-                  onMouseEnter={e => {
-                    if (!isOutOfStock) {
-                      (e.currentTarget as HTMLElement).style.transform = 'translateY(-8px)';
-                      (e.currentTarget as HTMLElement).style.boxShadow = CARD_GLOWS[idx].replace('0.2', '0.45');
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
-                    (e.currentTarget as HTMLElement).style.boxShadow = isOutOfStock ? 'none' : CARD_GLOWS[idx];
-                  }}
+                  bg={isOutOfStock ? "whiteAlpha.50" : "whiteAlpha.100"}
+                  borderColor={isOutOfStock ? "whiteAlpha.100" : idx === 0 ? "purple.500/40" : idx === 1 ? "cyan.500/40" : idx === 2 ? "orange.500/40" : "emerald.500/40"}
+                  borderWidth="1px"
+                  borderRadius="3xl"
+                  overflow="hidden"
+                  backdropFilter="blur(20px)"
+                  shadow={isOutOfStock ? "none" : "xl"}
+                  transition="all 0.3s ease"
+                  opacity={isOutOfStock ? 0.6 : 1}
+                  _hover={{ transform: isOutOfStock ? "none" : "translateY(-6px)", shadow: "2xl" }}
                 >
-                  <Box
-                    mb={6}
-                    borderRadius="16px"
-                    overflow="hidden"
-                    height="200px"
-                    position="relative"
-                    style={{
-                      border: '1px solid rgba(255,255,255,0.1)',
-                    }}
-                  >
-                    <img
-                      src={camp.product.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'}
-                      alt={camp.product.name}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        filter: isOutOfStock ? 'grayscale(100%)' : 'none',
-                        transition: 'transform 0.5s ease',
-                      }}
-                      onMouseEnter={e => {
-                        (e.currentTarget as HTMLImageElement).style.transform = 'scale(1.05)';
-                      }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLImageElement).style.transform = 'scale(1)';
-                      }}
-                    />
-                  </Box>
+                  <Card.Body p={6}>
+                    <Box borderRadius="2xl" overflow="hidden" h="200px" mb={4} border="1px solid" borderColor="whiteAlpha.100" bg="blackAlpha.300">
+                      <img
+                        src={camp.product.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'}
+                        alt={camp.product.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </Box>
 
-                  {/* Top row: name + discount badge */}
-                  <HStack justify="space-between" mb={4}>
-                    <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase" letterSpacing="wider">
-                      {camp.product.description}
-                    </Text>
-                    {!isOutOfStock && (
-                      <Box
-                        style={{
-                          background: 'linear-gradient(90deg, #f97316, #ec4899, #7c3aed, #ec4899, #f97316)',
-                          backgroundSize: '200% auto',
-                          animation: 'shimmer 3s linear infinite',
-                          borderRadius: '999px',
-                          padding: '2px 12px',
-                          fontSize: '11px',
-                          fontWeight: '800',
-                          color: 'white',
-                          letterSpacing: '0.5px',
-                        }}
-                      >
-                        %{camp.discount_percentage} İNDİRİM
-                      </Box>
-                    )}
-                  </HStack>
-
-                  <HStack justify="space-between" align="start" mb={5}>
-                    <Heading size="xl" color="white" fontWeight="800" lineHeight="1.2">
-                      {camp.product.name}
-                    </Heading>
-                    {user?.role === 'admin' && (
-                      <Button size="xs" colorPalette="red" variant="solid" onClick={() => handleDeleteCampaign(camp.id)}>
-                        Sil
-                      </Button>
-                    )}
-                  </HStack>
-
-                  {/* Price section */}
-                  <Box
-                    mb={5}
-                    p={4}
-                    style={{
-                      background: 'rgba(0,0,0,0.25)',
-                      borderRadius: '16px',
-                      border: '1px solid rgba(255,255,255,0.06)',
-                    }}
-                  >
-                    <HStack justify="space-between" align="flex-end">
-                      <Box>
-                        <Text fontSize="xs" color="whiteAlpha.500" mb={1}>İndirimli Fiyat</Text>
-                        <Text
-                          fontSize="3xl"
-                          fontWeight="900"
-                          style={{
-                            background: isOutOfStock
-                              ? 'none'
-                              : `linear-gradient(135deg, ${CARD_BORDERS[idx].replace('0.4', '1')}, white)`,
-                            WebkitBackgroundClip: isOutOfStock ? 'none' : 'text',
-                            WebkitTextFillColor: isOutOfStock ? 'gray' : 'transparent',
-                            backgroundClip: isOutOfStock ? 'none' : 'text',
-                            color: isOutOfStock ? 'gray' : undefined,
-                          }}
-                        >
-                          ₺{discountedPrice.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
-                        </Text>
-                      </Box>
-                      <Box textAlign="right">
-                        <Text fontSize="xs" color="whiteAlpha.400" mb={1}>Normal Fiyat</Text>
-                        <Text
-                          fontSize="md"
-                          color="whiteAlpha.400"
-                          textDecoration="line-through"
-                          fontWeight="500"
-                        >
-                          ₺{camp.product.original_price.toLocaleString('tr-TR')}
-                        </Text>
-                      </Box>
-                    </HStack>
-                  </Box>
-
-                  {/* Stock indicator */}
-                  <HStack justify="space-between" mb={5}>
-                    <HStack gap={2}>
-                      {!isOutOfStock ? (
-                        <>
-                          <Box
-                            position="relative"
-                            w={2}
-                            h={2}
-                          >
-                            <Box
-                              position="absolute"
-                              inset={0}
-                              bg="green.400"
-                              borderRadius="full"
-                              style={{ animation: 'pulse-ring 1.5s ease-out infinite', opacity: 0.6 }}
-                            />
-                            <Box w={2} h={2} bg="green.400" borderRadius="full" />
-                          </Box>
-                          <Text fontSize="sm" color="green.400" fontWeight="600">
-                            Kampanya Kotası: {camp.campaign_stock} adet
-                          </Text>
-                        </>
-                      ) : (
-                        <>
-                          <Box w={2} h={2} bg="red.400" borderRadius="full" />
-                          <Text fontSize="sm" color="red.400" fontWeight="600">Kota Doldu</Text>
-                        </>
+                    <HStack justify="space-between" mb={3}>
+                      <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase" letterSpacing="wider">
+                        {camp.product.description}
+                      </Text>
+                      {!isOutOfStock && (
+                        <Badge colorPalette={idx === 0 ? "purple" : idx === 1 ? "cyan" : idx === 2 ? "orange" : "emerald"} variant="solid" borderRadius="full" px={3} py={1} fontSize="xs" fontWeight="800">
+                          %{camp.discount_percentage} İNDİRİM
+                        </Badge>
                       )}
                     </HStack>
 
-                    {!isOutOfStock && camp.campaign_stock < 20 && (
-                      <Text fontSize="xs" color="orange.400" fontWeight="700">
-                        ⚠️ Son {camp.campaign_stock} adet!
-                      </Text>
-                    )}
-                  </HStack>
+                    <HStack justify="space-between" align="start" mb={4}>
+                      <Card.Title color="white" fontSize="2xl" fontWeight="800">
+                        {camp.product.name}
+                      </Card.Title>
+                      {user?.role === 'admin' && (
+                        <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(camp.id)}>
+                          <FiTrash2 size={13} /> Sil
+                        </Button>
+                      )}
+                    </HStack>
 
-                  {/* CTA Button */}
-                  <Button
-                    width="full"
-                    size="lg"
-                    disabled={isOutOfStock || isBuying}
-                    onClick={() => handleAddToCart(camp)}
-                    colorPalette={isOutOfStock ? "gray" : (isSuccess || cartSuccessId === camp.id) ? "emerald" : idx === 0 ? "purple" : idx === 1 ? "cyan" : idx === 2 ? "orange" : "emerald"}
-                    variant={isOutOfStock ? "subtle" : "solid"}
-                    borderRadius="xl"
-                    fontWeight="800"
-                    fontSize="15px"
-                    height="52px"
-                    boxShadow={isOutOfStock ? 'none' : '0 8px 24px rgba(124,58,237,0.3)'}
-                  >
-                    {isOutOfStock 
-                      ? 'Stok Tükendi' 
-                      : cartSuccessId === camp.id 
-                        ? '✅ Sepete Eklendi!' 
-                        : '🛒 Sepete Ekle'}
-                  </Button>
-                  <Box mt={6}>
-                    <CountdownTimer endTime={camp.end_time} />
-                  </Box>
-                </Box>
+                    <Card.Description as="div" mb={4} p={4} bg="blackAlpha.400" borderRadius="2xl" border="1px solid" borderColor="whiteAlpha.100">
+                      <HStack justify="space-between" align="flex-end">
+                        <Box>
+                          <Text fontSize="xs" color="whiteAlpha.500" mb={1}>İndirimli Fiyat</Text>
+                          <Text fontSize="3xl" fontWeight="900" color={isOutOfStock ? "gray.500" : "white"}>
+                            ₺{discountedPrice.toLocaleString('tr-TR', { minimumFractionDigits: 0 })}
+                          </Text>
+                        </Box>
+                        <Box textAlign="right">
+                          <Text fontSize="xs" color="whiteAlpha.400" mb={1}>Normal Fiyat</Text>
+                          <Text fontSize="md" color="whiteAlpha.400" textDecoration="line-through" fontWeight="500">
+                            ₺{camp.product.original_price.toLocaleString('tr-TR')}
+                          </Text>
+                        </Box>
+                      </HStack>
+                    </Card.Description>
+
+                    <HStack justify="space-between" mb={5}>
+                      <HStack gap={2}>
+                        <Badge colorPalette={isOutOfStock ? "red" : "emerald"} variant="subtle" size="sm" borderRadius="md" px={2} py={1}>
+                          {isOutOfStock ? "Kota Doldu" : `Kota: ${camp.campaign_stock} adet`}
+                        </Badge>
+                      </HStack>
+                      {!isOutOfStock && camp.campaign_stock < 20 && (
+                        <Text fontSize="xs" color="orange.400" fontWeight="700">
+                          ⚠️ Son {camp.campaign_stock} adet!
+                        </Text>
+                      )}
+                    </HStack>
+
+                    <Button
+                      width="full"
+                      size="lg"
+                      disabled={isOutOfStock || isBuying}
+                      onClick={() => handleAddToCart(camp)}
+                      colorPalette={isOutOfStock ? "gray" : (isSuccess || cartSuccessId === camp.id) ? "emerald" : idx === 0 ? "purple" : idx === 1 ? "cyan" : idx === 2 ? "orange" : "emerald"}
+                      variant={isOutOfStock ? "subtle" : "solid"}
+                      borderRadius="xl"
+                      fontWeight="800"
+                      fontSize="15px"
+                      height="52px"
+                    >
+                      {isOutOfStock 
+                        ? 'Stok Tükendi' 
+                        : cartSuccessId === camp.id 
+                          ? '✅ Sepete Eklendi!' 
+                          : '🛒 Sepete Ekle'}
+                    </Button>
+
+                    <Box mt={4}>
+                      <CountdownTimer endTime={camp.end_time} />
+                    </Box>
+                  </Card.Body>
+                </Card.Root>
               );
             })}
           </SimpleGrid>

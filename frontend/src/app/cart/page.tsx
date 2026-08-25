@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, Heading, VStack, HStack, Text, Button, Badge } from '@chakra-ui/react';
+import { Box, Container, Heading, VStack, HStack, Text, Button, Badge, Card } from '@chakra-ui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { updateQuantity, removeFromCart, clearCart } from '@/store/slices/cartSlice';
@@ -111,88 +111,69 @@ export default function CartPage() {
         ) : items.length > 0 ? (
           <VStack gap={6} align="stretch">
             {items.map(item => (
-              <Box
+              <Card.Root
                 key={item.campaignId}
-                p={5}
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  backdropFilter: 'blur(20px)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '20px',
-                }}
+                bg="whiteAlpha.100"
+                borderColor="whiteAlpha.200"
+                borderWidth="1px"
+                borderRadius="2xl"
+                backdropFilter="blur(20px)"
               >
-                <HStack justify="space-between">
-                  <VStack align="start" gap={1}>
-                    <Text fontSize="lg" fontWeight="bold" color="white">
-                      {item.name}
-                    </Text>
-                    <Text fontSize="sm" color="whiteAlpha.600">
-                      Birim Fiyat: ₺{item.price.toLocaleString('tr-TR')}
-                    </Text>
-                    {item.stock < 10 && (
-                      <Badge colorPalette="orange" fontSize="xs">Son {item.stock} stok!</Badge>
-                    )}
-                  </VStack>
-
-                  <HStack gap={4}>
-                    <VStack align="end">
-                      <Text fontWeight="800" fontSize="xl" color="fuchsia.400">
-                        ₺{(item.price * item.quantity).toLocaleString('tr-TR')}
+                <Card.Body p={5}>
+                  <HStack justify="space-between">
+                    <VStack align="start" gap={1}>
+                      <Text fontSize="lg" fontWeight="bold" color="white">
+                        {item.name}
                       </Text>
-                      <HStack gap={2}>
-                        <Button
-                          size="sm"
-                          onClick={() => dispatch(updateQuantity({ campaignId: item.campaignId, quantity: item.quantity - 1 }))}
-                          disabled={item.quantity <= 1}
-                          style={{
-                            background: 'rgba(255,255,255,0.08)',
-                            border: '1px solid rgba(255,255,255,0.2)',
-                            color: 'white',
-                            minWidth: '32px',
-                            height: '32px',
-                            padding: 0,
-                            borderRadius: '8px',
-                          }}
-                        >
-                          <FiMinus size={14} color="white" />
-                        </Button>
-                        <Text w="28px" textAlign="center" fontWeight="800" fontSize="16px" color="white">
-                          {item.quantity}
-                        </Text>
-                        <Button
-                          size="sm"
-                          onClick={() => dispatch(updateQuantity({ campaignId: item.campaignId, quantity: item.quantity + 1 }))}
-                          disabled={item.quantity >= item.stock}
-                          style={{
-                            background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
-                            border: 'none',
-                            color: 'white',
-                            minWidth: '32px',
-                            height: '32px',
-                            padding: 0,
-                            borderRadius: '8px',
-                            boxShadow: '0 2px 10px rgba(124,58,237,0.4)',
-                          }}
-                        >
-                          <FiPlus size={14} color="white" />
-                        </Button>
-                      </HStack>
+                      <Text fontSize="sm" color="whiteAlpha.600">
+                        Birim Fiyat: ₺{item.price.toLocaleString('tr-TR')}
+                      </Text>
+                      {item.stock < 10 && (
+                        <Badge colorPalette="orange" size="sm" variant="subtle">Son {item.stock} stok!</Badge>
+                      )}
                     </VStack>
-                    <Button
-                      size="sm"
-                      onClick={() => dispatch(removeFromCart(item.campaignId))}
-                      style={{
-                        background: 'rgba(239,68,68,0.12)',
-                        border: '1px solid rgba(239,68,68,0.3)',
-                        borderRadius: '10px',
-                        padding: '8px',
-                      }}
-                    >
-                      <FiTrash2 size={16} color="#f87171" />
-                    </Button>
+
+                    <HStack gap={4}>
+                      <VStack align="end">
+                        <Text fontWeight="800" fontSize="xl" color="fuchsia.400">
+                          ₺{(item.price * item.quantity).toLocaleString('tr-TR')}
+                        </Text>
+                        <HStack gap={2}>
+                          <Button
+                            size="xs"
+                            colorPalette="purple"
+                            variant="subtle"
+                            onClick={() => dispatch(updateQuantity({ campaignId: item.campaignId, quantity: item.quantity - 1 }))}
+                            disabled={item.quantity <= 1}
+                          >
+                            <FiMinus size={14} />
+                          </Button>
+                          <Text w="28px" textAlign="center" fontWeight="800" fontSize="16px" color="white">
+                            {item.quantity}
+                          </Text>
+                          <Button
+                            size="xs"
+                            colorPalette="purple"
+                            variant="solid"
+                            onClick={() => dispatch(updateQuantity({ campaignId: item.campaignId, quantity: item.quantity + 1 }))}
+                            disabled={item.quantity >= item.stock}
+                          >
+                            <FiPlus size={14} />
+                          </Button>
+                        </HStack>
+                      </VStack>
+                      <Button
+                        size="sm"
+                        colorPalette="red"
+                        variant="subtle"
+                        onClick={() => dispatch(removeFromCart(item.campaignId))}
+                      >
+                        <FiTrash2 size={16} />
+                      </Button>
+                    </HStack>
                   </HStack>
-                </HStack>
-              </Box>
+                </Card.Body>
+              </Card.Root>
             ))}
 
             <Box mt={8} p={6} bg="blackAlpha.500" borderRadius="20px" border="1px solid rgba(255,255,255,0.1)">
