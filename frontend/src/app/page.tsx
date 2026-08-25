@@ -321,12 +321,19 @@ export default function Home() {
                       size="lg"
                       disabled={isOutOfStock || isBuying}
                       onClick={() => handleAddToCart(camp)}
-                      colorPalette={isOutOfStock ? "gray" : (isSuccess || cartSuccessId === camp.id) ? "emerald" : idx === 0 ? "purple" : idx === 1 ? "cyan" : idx === 2 ? "orange" : "emerald"}
-                      variant={isOutOfStock ? "subtle" : "solid"}
+                      bg={isOutOfStock ? "whiteAlpha.100" : (isSuccess || cartSuccessId === camp.id) ? "emerald.500" : "linear-gradient(135deg, #7c3aed, #ec4899)"}
+                      color={isOutOfStock ? "whiteAlpha.400" : "white"}
                       borderRadius="xl"
                       fontWeight="800"
                       fontSize="15px"
                       height="52px"
+                      border="none"
+                      boxShadow={isOutOfStock ? "none" : "0 8px 25px rgba(124,58,237,0.4)"}
+                      _hover={{
+                        bg: isOutOfStock ? "whiteAlpha.100" : (isSuccess || cartSuccessId === camp.id) ? "emerald.600" : "linear-gradient(135deg, #6d28d9, #db2777)",
+                        transform: isOutOfStock ? "none" : "translateY(-2px)",
+                        boxShadow: isOutOfStock ? "none" : "0 12px 30px rgba(124,58,237,0.6)",
+                      }}
                     >
                       {isOutOfStock 
                         ? 'Stok Tükendi' 
