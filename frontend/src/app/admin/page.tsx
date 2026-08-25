@@ -6,6 +6,7 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { showToast } from '@/components/Toast';
+import { FiTrash2, FiRefreshCw, FiPlus, FiZap } from 'react-icons/fi';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -297,7 +298,9 @@ export default function AdminPage() {
                   <Input type="datetime-local" bg="blackAlpha.400" value={campEnd} onChange={e => setCampEnd(e.target.value)} />
                 </Box>
               </HStack>
-              <Button colorPalette="fuchsia" onClick={handleAddCampaign} disabled={!campProductId || !campDiscount || !campStock || !campStart || !campEnd}>Kampanya Oluştur</Button>
+              <Button colorPalette="fuchsia" onClick={handleAddCampaign} disabled={!campProductId || !campDiscount || !campStock || !campStart || !campEnd}>
+                <FiPlus size={16} /> Kampanya Oluştur
+              </Button>
 
               <Box mt={8}>
                 <Heading size="md" color="green.400" mb={2}>🟢 Aktif Kampanyalar</Heading>
@@ -305,7 +308,9 @@ export default function AdminPage() {
                   {activeCampaigns.map(c => (
                     <HStack key={c.id} justify="space-between" py={2} borderBottom="1px solid rgba(255,255,255,0.1)">
                       <Text color="white">{c.product?.name} (%{c.discount_percentage} İndirim) - Kota: {c.campaign_stock}</Text>
-                      <Button size="sm" colorPalette="red" onClick={() => handleDeleteCampaign(c.id)}>Sil</Button>
+                      <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
+                        <FiTrash2 size={13} /> Sil
+                      </Button>
                     </HStack>
                   ))}
                   {activeCampaigns.length === 0 && <Text color="whiteAlpha.500" fontSize="sm">Yok</Text>}
@@ -316,7 +321,9 @@ export default function AdminPage() {
                   {upcomingCampaigns.map(c => (
                     <HStack key={c.id} justify="space-between" py={2} borderBottom="1px solid rgba(255,255,255,0.1)">
                       <Text color="white">{c.product?.name} (%{c.discount_percentage} İndirim) - Kota: {c.campaign_stock}</Text>
-                      <Button size="sm" colorPalette="red" onClick={() => handleDeleteCampaign(c.id)}>Sil</Button>
+                      <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
+                        <FiTrash2 size={13} /> Sil
+                      </Button>
                     </HStack>
                   ))}
                   {upcomingCampaigns.length === 0 && <Text color="whiteAlpha.500" fontSize="sm">Yok</Text>}
@@ -327,9 +334,13 @@ export default function AdminPage() {
                   {expiredCampaigns.map(c => (
                     <HStack key={c.id} justify="space-between" py={2} borderBottom="1px solid rgba(255,255,255,0.1)">
                       <Text color="white">{c.product?.name}</Text>
-                      <HStack>
-                        <Button size="sm" colorPalette="blue" onClick={() => handleRestartCampaign(c.id)}>Yeniden Başlat</Button>
-                        <Button size="sm" colorPalette="red" onClick={() => handleDeleteCampaign(c.id)}>Sil</Button>
+                      <HStack gap={2}>
+                        <Button size="xs" colorPalette="blue" variant="subtle" onClick={() => handleRestartCampaign(c.id)}>
+                          <FiRefreshCw size={13} /> Yeniden Başlat
+                        </Button>
+                        <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
+                          <FiTrash2 size={13} /> Sil
+                        </Button>
                       </HStack>
                     </HStack>
                   ))}
