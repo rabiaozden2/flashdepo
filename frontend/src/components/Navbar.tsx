@@ -133,10 +133,10 @@ export default function Navbar() {
           )}
           {token && user?.role === 'customer' && (
             <Link href="/apply">
-              <Text color="cyan.400" fontWeight="600" fontSize="sm" _hover={{ color: 'cyan.300' }}
-                style={{ transition: 'color 0.2s' }}>
-                🚀 Satıcı Ol (Başvuru Yap)
-              </Text>
+              <HStack gap={1.5} color="cyan.400" _hover={{ color: 'cyan.300' }} style={{ transition: 'color 0.2s' }}>
+                <FiBriefcase size={14} />
+                <Text fontWeight="600" fontSize="sm">Satıcı Başvurusu</Text>
+              </HStack>
             </Link>
           )}
           {token && user?.role === 'admin' && (

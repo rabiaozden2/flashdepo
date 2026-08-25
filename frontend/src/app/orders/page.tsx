@@ -5,6 +5,7 @@ import { Box, Container, Heading, VStack, Text, Badge, HStack, Spinner, Image, S
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
+import { FiShoppingBag } from 'react-icons/fi';
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -91,7 +92,7 @@ export default function OrdersPage() {
 
         {orders.length === 0 ? (
           <VStack py={20} gap={4} bg="rgba(0,0,0,0.3)" borderRadius="2xl" border="1px dashed rgba(255,255,255,0.1)">
-            <Text fontSize="6xl">🛒</Text>
+            <FiShoppingBag size={48} color="#a855f7" />
             <Text color="whiteAlpha.600" fontSize="lg">Henüz bir siparişiniz bulunmamaktadır.</Text>
             <Button mt={4} colorPalette="fuchsia" onClick={() => router.push('/')}>Fırsatları Keşfet</Button>
           </VStack>

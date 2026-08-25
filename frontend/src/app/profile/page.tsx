@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { logout } from '@/store/slices/authSlice';
 import { clearCart } from '@/store/slices/cartSlice';
 import { useEffect, useState } from 'react';
-import { FiUser, FiShield, FiPackage, FiLogOut, FiCheckCircle, FiBriefcase, FiSend, FiClock } from 'react-icons/fi';
+import { FiUser, FiShield, FiPackage, FiLogOut, FiCheckCircle, FiBriefcase, FiSend, FiClock, FiShoppingBag } from 'react-icons/fi';
 import { showToast } from '@/components/Toast';
 
 export default function ProfilePage() {
@@ -336,7 +336,10 @@ export default function ProfilePage() {
                   borderRadius: '16px',
                 }}
               >
-                🛒 Siparişlerimi Görüntüle
+                <HStack gap={2}>
+                  <FiShoppingBag size={16} />
+                  <Text>Siparişlerimi Görüntüle</Text>
+                </HStack>
               </Button>
 
               <Button

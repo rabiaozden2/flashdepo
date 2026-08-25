@@ -8,7 +8,7 @@ import { logout } from '@/store/slices/authSlice';
 import { showToast } from '@/components/Toast';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FiPlus, FiMinus, FiTrash2 } from 'react-icons/fi';
+import { FiPlus, FiMinus, FiTrash2, FiShoppingBag } from 'react-icons/fi';
 
 export default function CartPage() {
   const router = useRouter();
@@ -71,13 +71,13 @@ export default function CartPage() {
         <Heading
           size="2xl"
           mb={8}
-          style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #ec4899 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
+          color="white"
+          fontWeight="900"
         >
-          Sepetim 🛒
+          <HStack gap={3}>
+            <FiShoppingBag color="#a855f7" size={32} />
+            <Text>Alışveriş Sepeti</Text>
+          </HStack>
         </Heading>
 
         {checkoutResult && (
