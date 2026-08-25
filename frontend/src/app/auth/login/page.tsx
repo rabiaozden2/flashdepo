@@ -11,8 +11,8 @@ import { FiShield, FiBriefcase, FiUser, FiZap } from 'react-icons/fi';
 
 export default function LoginPage() {
   const [portalRole, setPortalRole] = useState<'customer' | 'warehouse_manager' | 'admin'>('customer');
-  const [email, setEmail] = useState('customer@flashdepo.com');
-  const [password, setPassword] = useState('customer123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [focused, setFocused] = useState<string | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
@@ -24,16 +24,8 @@ export default function LoginPage() {
 
   const handleRoleSwitch = (role: 'customer' | 'warehouse_manager' | 'admin') => {
     setPortalRole(role);
-    if (role === 'customer') {
-      setEmail('customer@flashdepo.com');
-      setPassword('customer123');
-    } else if (role === 'warehouse_manager') {
-      setEmail('manager1@flashdepo.com');
-      setPassword('manager123');
-    } else {
-      setEmail('admin@flashdepo.com');
-      setPassword('admin123');
-    }
+    setEmail('');
+    setPassword('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
