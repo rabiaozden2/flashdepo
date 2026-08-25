@@ -577,84 +577,103 @@ export default function AdminPage() {
             </SimpleGrid>
           </VStack>
         ) : tab === 'products' ? (
-          <VStack align="stretch" gap={8}>
-            {/* Create Product Card */}
-            <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
-              <Card.Header p={6} pb={0}>
-                <HStack justify="space-between" flexWrap="wrap">
-                  <Box>
-                    <Card.Title color="white" fontSize="xl" fontWeight="bold">📦 Yeni Ürün Tanımla</Card.Title>
-                    <Card.Description color="whiteAlpha.600" fontSize="sm">Depoya yeni ürün ekleyin veya Yapay Zeka ile otomatik katalog bilgisi çekin.</Card.Description>
-                  </Box>
+          <VStack align="stretch" gap={6}>
+            {/* Depo Yöneticisi Feature Info Notice */}
+            <Box p={4} bg="cyan.500/10" borderRadius="2xl" border="1px solid rgba(6,182,212,0.3)">
+              <HStack gap={3}>
+                <Box p={2} bg="cyan.500/20" borderRadius="xl" color="cyan.300">
+                  <FiBriefcase size={20} />
+                </Box>
+                <Box>
+                  <Text color="white" fontWeight="bold" fontSize="sm">Depo Yöneticisi Ürün & Stok Girişi</Text>
+                  <Text color="cyan.200" fontSize="xs">
+                    Ürün ekleme ve envanter yönetimi onaylı <b>Depo Yöneticileri (Satıcılar)</b> tarafından gerçekleştirilir. Admin onaylı kullanıcılar kendi depolarına ürün ve stok girebilir.
+                  </Text>
+                </Box>
+              </HStack>
+            </Box>
+
+            {/* Compact Product Creation Card */}
+            <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
+              <Card.Header p={4} pb={2}>
+                <HStack justify="space-between">
+                  <Card.Title color="white" fontSize="md" fontWeight="bold">
+                    <HStack gap={2}>
+                      <FiPackage color="#38bdf8" size={16} />
+                      <Text>Hızlı Ürün Girişi</Text>
+                    </HStack>
+                  </Card.Title>
+                  <Badge colorPalette="cyan" variant="subtle" size="xs">Depo Yetkili İşlemi</Badge>
                 </HStack>
               </Card.Header>
 
-              <Card.Body p={6}>
-                <VStack align="stretch" gap={5}>
-                  <Box>
-                    <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Bağlı Olduğu Depo</Text>
-                    <select
-                      value={prodWarehouseId}
-                      onChange={(e: any) => setProdWarehouseId(e.target.value)}
-                      style={{
-                        background: '#0f0c29',
-                        color: 'white',
-                        padding: '14px 16px',
-                        borderRadius: '12px',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        outline: 'none',
-                        fontSize: '14px',
-                        width: '100%',
-                      }}
-                    >
-                      <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Depo Seçiniz --</option>
-                      {warehouses.map(w => (
-                        <option key={w.id} value={w.id} style={{ background: '#0f0c29', color: 'white' }}>{w.name} ({w.location})</option>
-                      ))}
-                    </select>
-                  </Box>
+              <Card.Body p={4}>
+                <VStack align="stretch" gap={3}>
+                  <SimpleGrid columns={{ base: 1, md: 3 }} gap={3}>
+                    <Box>
+                      <select
+                        value={prodWarehouseId}
+                        onChange={(e: any) => setProdWarehouseId(e.target.value)}
+                        style={{
+                          background: '#0f0c29',
+                          color: 'white',
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          outline: 'none',
+                          fontSize: '13px',
+                          width: '100%',
+                        }}
+                      >
+                        <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Depo Seçiniz --</option>
+                        {warehouses.map(w => (
+                          <option key={w.id} value={w.id} style={{ background: '#0f0c29', color: 'white' }}>{w.name} ({w.location})</option>
+                        ))}
+                      </select>
+                    </Box>
 
-                  <HStack gap={3}>
+                    <HStack gap={2}>
+                      <Input
+                        placeholder="Ürün Adı"
+                        size="md"
+                        borderRadius="lg"
+                        bg="blackAlpha.500"
+                        borderColor="whiteAlpha.200"
+                        color="white"
+                        value={prodName}
+                        onChange={e => setProdName(e.target.value)}
+                      />
+                      <Button
+                        size="md"
+                        colorPalette="cyan"
+                        variant="subtle"
+                        borderRadius="lg"
+                        onClick={handleAutoFill}
+                        loading={isAutoFilling}
+                        disabled={isAutoFilling || !prodName}
+                      >
+                        <FiZap size={15} /> AI
+                      </Button>
+                    </HStack>
+
                     <Input
-                      placeholder="Ürün Adı (Örn: iPhone 16 Pro Max)"
-                      size="lg"
-                      borderRadius="xl"
+                      placeholder="Açıklama"
+                      size="md"
+                      borderRadius="lg"
                       bg="blackAlpha.500"
                       borderColor="whiteAlpha.200"
                       color="white"
-                      value={prodName}
-                      onChange={e => setProdName(e.target.value)}
+                      value={prodDesc}
+                      onChange={e => setProdDesc(e.target.value)}
                     />
-                    <Button
-                      size="lg"
-                      colorPalette="cyan"
-                      variant="solid"
-                      borderRadius="xl"
-                      onClick={handleAutoFill}
-                      loading={isAutoFilling}
-                      disabled={isAutoFilling || !prodName}
-                    >
-                      <FiZap size={18} /> AI ile Doldur
-                    </Button>
-                  </HStack>
+                  </SimpleGrid>
 
-                  <Input
-                    placeholder="Açıklama / Özellikler"
-                    size="lg"
-                    borderRadius="xl"
-                    bg="blackAlpha.500"
-                    borderColor="whiteAlpha.200"
-                    color="white"
-                    value={prodDesc}
-                    onChange={e => setProdDesc(e.target.value)}
-                  />
-
-                  <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
+                  <SimpleGrid columns={{ base: 1, md: 4 }} gap={3}>
                     <Input
-                      placeholder="Orijinal Fiyat (TL)"
+                      placeholder="Fiyat (TL)"
                       type="number"
-                      size="lg"
-                      borderRadius="xl"
+                      size="md"
+                      borderRadius="lg"
                       bg="blackAlpha.500"
                       borderColor="whiteAlpha.200"
                       color="white"
@@ -664,8 +683,8 @@ export default function AdminPage() {
                     <Input
                       placeholder="Stok Adedi"
                       type="number"
-                      size="lg"
-                      borderRadius="xl"
+                      size="md"
+                      borderRadius="lg"
                       bg="blackAlpha.500"
                       borderColor="whiteAlpha.200"
                       color="white"
@@ -673,28 +692,25 @@ export default function AdminPage() {
                       onChange={e => setProdStock(e.target.value)}
                     />
                     <Input
-                      placeholder="Görsel URL (İsteğe bağlı)"
-                      size="lg"
-                      borderRadius="xl"
+                      placeholder="Görsel URL (Opsiyonel)"
+                      size="md"
+                      borderRadius="lg"
                       bg="blackAlpha.500"
                       borderColor="whiteAlpha.200"
                       color="white"
                       value={prodImage}
                       onChange={e => setProdImage(e.target.value)}
                     />
+                    <Button
+                      size="md"
+                      colorPalette="emerald"
+                      variant="solid"
+                      borderRadius="lg"
+                      onClick={handleAddProduct}
+                    >
+                      <FiPlus size={16} /> Ürünü Depoya Ekle
+                    </Button>
                   </SimpleGrid>
-
-                  <Button
-                    size="lg"
-                    colorPalette="cyan"
-                    borderRadius="xl"
-                    height="50px"
-                    fontWeight="bold"
-                    onClick={handleAddProduct}
-                    disabled={!prodWarehouseId || !prodName || !prodPrice || !prodStock}
-                  >
-                    <FiPlus size={18} /> Ürünü Kaydet
-                  </Button>
                 </VStack>
               </Card.Body>
             </Card.Root>
