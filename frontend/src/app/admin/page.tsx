@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Box, Container, Heading, VStack, HStack, Button, Input, Select, Text } from '@chakra-ui/react';
+import { Box, Container, Heading, VStack, HStack, Button, Input, Text, Card, Table, Badge, SimpleGrid } from '@chakra-ui/react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { showToast } from '@/components/Toast';
-import { FiTrash2, FiRefreshCw, FiPlus, FiZap } from 'react-icons/fi';
+import { FiTrash2, FiRefreshCw, FiPlus, FiZap, FiBox, FiTag, FiShoppingBag, FiLayers } from 'react-icons/fi';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -217,203 +217,462 @@ export default function AdminPage() {
   const expiredCampaigns = campaigns.filter(c => c.campaign_stock <= 0 || new Date(c.end_time).getTime() <= now);
 
   return (
-    <Box position="relative" zIndex={1} minH="100vh">
-      <Container maxW="container.xl" py={12} px={6}>
-        <Heading
-          size="2xl"
-          mb={8}
-          style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #ec4899 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-          }}
-        >
-          Admin Paneli
-        </Heading>
+    <Box position="relative" zIndex={1} minH="100vh" py={12}>
+      <Container maxW="container.xl" px={6}>
+        {/* Header section */}
+        <VStack align="start" gap={3} mb={8}>
+          <HStack gap={3}>
+            <Badge colorPalette="purple" variant="solid" size="lg" borderRadius="full" px={3} py={1}>
+              👑 Admin Kontrol Paneli
+            </Badge>
+            <Badge colorPalette="emerald" variant="subtle" size="lg" borderRadius="full" px={3} py={1}>
+              ● Sistem Aktif
+            </Badge>
+          </HStack>
+          <Heading
+            size="2xl"
+            fontWeight="900"
+            style={{
+              background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #ec4899 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}
+          >
+            Yönetim ve Kampanya Merkezi
+          </Heading>
+          <Text color="whiteAlpha.600" fontSize="md">
+            Dağıtık depolardaki ürün stoklarını, anlık indirim kampanyalarını ve yapay zeka destekli katalog oluşturmayı buradan yönetin.
+          </Text>
+        </VStack>
 
+        {/* Quick Stats Grid */}
+        <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} mb={8}>
+          <Card.Root bg="whiteAlpha.100" borderColor="purple.500/30" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
+            <Card.Body p={5}>
+              <HStack justify="space-between">
+                <Box>
+                  <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase">Aktif Kampanyalar</Text>
+                  <Text fontSize="3xl" fontWeight="900" color="purple.300">{activeCampaigns.length} Adet</Text>
+                </Box>
+                <Box p={3} bg="purple.500/20" borderRadius="xl" color="purple.300">
+                  <FiTag size={24} />
+                </Box>
+              </HStack>
+            </Card.Body>
+          </Card.Root>
+
+          <Card.Root bg="whiteAlpha.100" borderColor="cyan.500/30" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
+            <Card.Body p={5}>
+              <HStack justify="space-between">
+                <Box>
+                  <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase">Toplam Envanter Ürünü</Text>
+                  <Text fontSize="3xl" fontWeight="900" color="cyan.300">{products.length} Kalem</Text>
+                </Box>
+                <Box p={3} bg="cyan.500/20" borderRadius="xl" color="cyan.300">
+                  <FiBox size={24} />
+                </Box>
+              </HStack>
+            </Card.Body>
+          </Card.Root>
+
+          <Card.Root bg="whiteAlpha.100" borderColor="emerald.500/30" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
+            <Card.Body p={5}>
+              <HStack justify="space-between">
+                <Box>
+                  <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase">Aktif Depo Sayısı</Text>
+                  <Text fontSize="3xl" fontWeight="900" color="emerald.300">{warehouses.length} Merkez</Text>
+                </Box>
+                <Box p={3} bg="emerald.500/20" borderRadius="xl" color="emerald.300">
+                  <FiLayers size={24} />
+                </Box>
+              </HStack>
+            </Card.Body>
+          </Card.Root>
+        </SimpleGrid>
+
+        {/* Tab Selector */}
         <HStack gap={4} mb={8}>
           <Button 
-            variant={tab === 'campaigns' ? 'solid' : 'outline'} 
+            size="lg"
+            variant={tab === 'campaigns' ? 'solid' : 'subtle'} 
             colorPalette="purple" 
+            borderRadius="xl"
             onClick={() => setTab('campaigns')}
           >
-            Kampanyalar
+            <FiTag size={18} /> Kampanya Yönetimi
           </Button>
           <Button 
-            variant={tab === 'products' ? 'solid' : 'outline'} 
-            colorPalette="purple" 
+            size="lg"
+            variant={tab === 'products' ? 'solid' : 'subtle'} 
+            colorPalette="cyan" 
+            borderRadius="xl"
             onClick={() => setTab('products')}
           >
-            Ürünler
+            <FiBox size={18} /> Ürün & Envanter Yönetimi
           </Button>
         </HStack>
 
-        <Box
-          p={6}
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            backdropFilter: 'blur(20px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '20px',
-          }}
-        >
-          {tab === 'campaigns' ? (
-            <VStack align="stretch" gap={4}>
-              <Heading size="md" color="white">Yeni Kampanya Ekle</Heading>
-              
-              <Text color="whiteAlpha.700" fontSize="sm">Ürün Seçin</Text>
-              <select
-                value={campProductId}
-                onChange={(e: any) => setCampProductId(e.target.value)}
-                style={{
-                  background: '#0f0c29',
-                  color: 'white',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  outline: 'none',
-                  fontSize: '14px',
-                  width: '100%',
-                }}
-              >
-                <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Ürün Seç --</option>
-                {products.map(p => (
-                  <option key={p.id} value={p.id} style={{ background: '#0f0c29', color: 'white' }}>
-                    {p.name} (Stok: {p.stock} - {p.warehouse ? p.warehouse.name : 'Bilinmiyor'})
-                  </option>
-                ))}
-              </select>
+        {/* Main Content Area */}
+        {tab === 'campaigns' ? (
+          <VStack align="stretch" gap={8}>
+            {/* Create Campaign Form Card */}
+            <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+              <Card.Header p={6} pb={0}>
+                <Card.Title color="white" fontSize="xl" fontWeight="bold">
+                  ⚡️ Yeni Flash Sale Kampanyası Oluştur
+                </Card.Title>
+                <Card.Description color="whiteAlpha.600" fontSize="sm">
+                  Depodaki mevcut bir ürünü seçerek anlık indirim oranı ve stok kotası tanımlayın.
+                </Card.Description>
+              </Card.Header>
 
-              <HStack>
-                <Input placeholder="İndirim Yüzdesi (örn: 20)" type="number" bg="blackAlpha.400" value={campDiscount} onChange={e => setCampDiscount(e.target.value)} />
-                <Input placeholder="Kampanya Kotası (Adet)" type="number" bg="blackAlpha.400" value={campStock} onChange={e => setCampStock(e.target.value)} />
-              </HStack>
-              <HStack>
-                <Box flex={1}>
-                  <Text color="whiteAlpha.700" fontSize="sm" mb={1}>Başlangıç Zamanı</Text>
-                  <Input type="datetime-local" bg="blackAlpha.400" value={campStart} onChange={e => setCampStart(e.target.value)} />
-                </Box>
-                <Box flex={1}>
-                  <Text color="whiteAlpha.700" fontSize="sm" mb={1}>Bitiş Zamanı</Text>
-                  <Input type="datetime-local" bg="blackAlpha.400" value={campEnd} onChange={e => setCampEnd(e.target.value)} />
-                </Box>
-              </HStack>
-              <Button colorPalette="fuchsia" onClick={handleAddCampaign} disabled={!campProductId || !campDiscount || !campStock || !campStart || !campEnd}>
-                <FiPlus size={16} /> Kampanya Oluştur
-              </Button>
+              <Card.Body p={6}>
+                <VStack align="stretch" gap={5}>
+                  <Box>
+                    <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Hedef Ürün Seçin</Text>
+                    <select
+                      value={campProductId}
+                      onChange={(e: any) => setCampProductId(e.target.value)}
+                      style={{
+                        background: '#0f0c29',
+                        color: 'white',
+                        padding: '14px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        outline: 'none',
+                        fontSize: '14px',
+                        width: '100%',
+                      }}
+                    >
+                      <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Seçiniz --</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id} style={{ background: '#0f0c29', color: 'white' }}>
+                          {p.name} (Stok: {p.stock} adet - Depo: {p.warehouse ? p.warehouse.name : 'Genel'})
+                        </option>
+                      ))}
+                    </select>
+                  </Box>
 
-              <Box mt={8}>
-                <Heading size="md" color="green.400" mb={2}>🟢 Aktif Kampanyalar</Heading>
-                <Box bg="blackAlpha.400" p={4} borderRadius="xl" mb={4}>
-                  {activeCampaigns.map(c => (
-                    <HStack key={c.id} justify="space-between" py={2} borderBottom="1px solid rgba(255,255,255,0.1)">
-                      <Text color="white">{c.product?.name} (%{c.discount_percentage} İndirim) - Kota: {c.campaign_stock}</Text>
-                      <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
-                        <FiTrash2 size={13} /> Sil
-                      </Button>
-                    </HStack>
-                  ))}
-                  {activeCampaigns.length === 0 && <Text color="whiteAlpha.500" fontSize="sm">Yok</Text>}
-                </Box>
+                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+                    <Box>
+                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">İndirim Oranı (%)</Text>
+                      <Input
+                        placeholder="Örn: 25 (%25 İndirim)"
+                        type="number"
+                        size="lg"
+                        borderRadius="xl"
+                        bg="blackAlpha.500"
+                        borderColor="whiteAlpha.200"
+                        color="white"
+                        value={campDiscount}
+                        onChange={e => setCampDiscount(e.target.value)}
+                      />
+                    </Box>
+                    <Box>
+                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Kampanya Satış Kotası (Adet)</Text>
+                      <Input
+                        placeholder="Örn: 50"
+                        type="number"
+                        size="lg"
+                        borderRadius="xl"
+                        bg="blackAlpha.500"
+                        borderColor="whiteAlpha.200"
+                        color="white"
+                        value={campStock}
+                        onChange={e => setCampStock(e.target.value)}
+                      />
+                    </Box>
+                  </SimpleGrid>
 
-                <Heading size="md" color="orange.400" mb={2}>⏳ Yaklaşan Kampanyalar</Heading>
-                <Box bg="blackAlpha.400" p={4} borderRadius="xl" mb={4}>
-                  {upcomingCampaigns.map(c => (
-                    <HStack key={c.id} justify="space-between" py={2} borderBottom="1px solid rgba(255,255,255,0.1)">
-                      <Text color="white">{c.product?.name} (%{c.discount_percentage} İndirim) - Kota: {c.campaign_stock}</Text>
-                      <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
-                        <FiTrash2 size={13} /> Sil
-                      </Button>
-                    </HStack>
-                  ))}
-                  {upcomingCampaigns.length === 0 && <Text color="whiteAlpha.500" fontSize="sm">Yok</Text>}
-                </Box>
+                  <SimpleGrid columns={{ base: 1, md: 2 }} gap={4}>
+                    <Box>
+                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Başlangıç Tarih & Saati</Text>
+                      <Input
+                        type="datetime-local"
+                        size="lg"
+                        borderRadius="xl"
+                        bg="blackAlpha.500"
+                        borderColor="whiteAlpha.200"
+                        color="white"
+                        value={campStart}
+                        onChange={e => setCampStart(e.target.value)}
+                      />
+                    </Box>
+                    <Box>
+                      <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Bitiş Tarih & Saati</Text>
+                      <Input
+                        type="datetime-local"
+                        size="lg"
+                        borderRadius="xl"
+                        bg="blackAlpha.500"
+                        borderColor="whiteAlpha.200"
+                        color="white"
+                        value={campEnd}
+                        onChange={e => setCampEnd(e.target.value)}
+                      />
+                    </Box>
+                  </SimpleGrid>
 
-                <Heading size="md" color="red.400" mb={2}>🔴 Süresi Biten Kampanyalar</Heading>
-                <Box bg="blackAlpha.400" p={4} borderRadius="xl">
-                  {expiredCampaigns.map(c => (
-                    <HStack key={c.id} justify="space-between" py={2} borderBottom="1px solid rgba(255,255,255,0.1)">
-                      <Text color="white">{c.product?.name}</Text>
-                      <HStack gap={2}>
-                        <Button size="xs" colorPalette="blue" variant="subtle" onClick={() => handleRestartCampaign(c.id)}>
-                          <FiRefreshCw size={13} /> Yeniden Başlat
-                        </Button>
+                  <Button
+                    size="lg"
+                    colorPalette="purple"
+                    borderRadius="xl"
+                    height="50px"
+                    fontWeight="bold"
+                    onClick={handleAddCampaign}
+                    disabled={!campProductId || !campDiscount || !campStock || !campStart || !campEnd}
+                  >
+                    <FiPlus size={18} /> Kampanyayı Canlıya Al
+                  </Button>
+                </VStack>
+              </Card.Body>
+            </Card.Root>
+
+            {/* Campaign Lists */}
+            <SimpleGrid columns={{ base: 1, lg: 3 }} gap={6}>
+              {/* Active */}
+              <Card.Root bg="whiteAlpha.100" borderColor="emerald.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+                <Card.Header p={5} pb={2}>
+                  <HStack justify="space-between">
+                    <Card.Title color="emerald.300" fontSize="lg" fontWeight="bold">🟢 Aktif Kampanyalar</Card.Title>
+                    <Badge colorPalette="emerald" variant="solid" borderRadius="full">{activeCampaigns.length}</Badge>
+                  </HStack>
+                </Card.Header>
+                <Card.Body p={5}>
+                  <VStack align="stretch" gap={3}>
+                    {activeCampaigns.map(c => (
+                      <HStack key={c.id} justify="space-between" p={3} bg="blackAlpha.400" borderRadius="xl" border="1px solid" borderColor="whiteAlpha.100">
+                        <Box>
+                          <Text color="white" fontWeight="bold" fontSize="sm">{c.product?.name}</Text>
+                          <Text color="emerald.400" fontSize="xs">%{c.discount_percentage} İndirim • Kota: {c.campaign_stock}</Text>
+                        </Box>
                         <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
                           <FiTrash2 size={13} /> Sil
                         </Button>
                       </HStack>
-                    </HStack>
-                  ))}
-                  {expiredCampaigns.length === 0 && <Text color="whiteAlpha.500" fontSize="sm">Yok</Text>}
-                </Box>
-              </Box>
-            </VStack>
-          ) : (
-            <VStack align="stretch" gap={4}>
-              <Heading size="md" color="white">Yeni Ürün Ekle</Heading>
-              
-              <Text color="whiteAlpha.700" fontSize="sm">Depo Seçin</Text>
-              <select
-                value={prodWarehouseId}
-                onChange={(e: any) => setProdWarehouseId(e.target.value)}
-                style={{
-                  background: '#0f0c29',
-                  color: 'white',
-                  padding: '12px 16px',
-                  borderRadius: '12px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  outline: 'none',
-                  fontSize: '14px',
-                  width: '100%',
-                }}
-              >
-                <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Depo Seç --</option>
-                {warehouses.map(w => (
-                  <option key={w.id} value={w.id} style={{ background: '#0f0c29', color: 'white' }}>{w.name}</option>
-                ))}
-              </select>
+                    ))}
+                    {activeCampaigns.length === 0 && <Text color="whiteAlpha.400" fontSize="sm" py={4} textAlign="center">Aktif kampanya bulunmuyor.</Text>}
+                  </VStack>
+                </Card.Body>
+              </Card.Root>
 
-              <HStack>
-                <Input placeholder="Ürün Adı (örn: iPhone 16)" bg="blackAlpha.400" value={prodName} onChange={e => setProdName(e.target.value)} />
-                <Button colorPalette="blue" onClick={handleAutoFill} loading={isAutoFilling} disabled={isAutoFilling || !prodName}>
-                  ✨ AI ile Doldur
-                </Button>
-              </HStack>
-              <Input placeholder="Kısa Açıklama" bg="blackAlpha.400" value={prodDesc} onChange={e => setProdDesc(e.target.value)} />
-              <Input placeholder="Fiyat (TL)" type="number" bg="blackAlpha.400" value={prodPrice} onChange={e => setProdPrice(e.target.value)} />
-              <Input placeholder="Stok Adedi" type="number" bg="blackAlpha.400" value={prodStock} onChange={e => setProdStock(e.target.value)} />
-              <Input placeholder="Resim URL (Webden kopyalanmış resim adresi)" bg="blackAlpha.400" value={prodImage} onChange={e => setProdImage(e.target.value)} />
-              
-              <Button colorPalette="fuchsia" onClick={handleAddProduct} disabled={!prodWarehouseId || !prodName || !prodPrice || !prodStock}>Ürün Ekle</Button>
-            
-              <Box mt={8}>
-                <Heading size="md" color="white" mb={4}>Mevcut Ürünler (Envanter)</Heading>
-                <Box overflowX="auto" bg="blackAlpha.400" p={4} borderRadius="xl">
-                  <table style={{ width: '100%', textAlign: 'left', color: 'white' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-                        <th style={{ padding: '8px' }}>Ürün Adı</th>
-                        <th style={{ padding: '8px' }}>Fiyat</th>
-                        <th style={{ padding: '8px' }}>Stok</th>
-                        <th style={{ padding: '8px' }}>Depo / Konum</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {products.map(p => (
-                        <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <td style={{ padding: '8px' }}>{p.name}</td>
-                          <td style={{ padding: '8px' }}>₺{p.original_price}</td>
-                          <td style={{ padding: '8px' }}>{p.stock}</td>
-                          <td style={{ padding: '8px', color: '#a855f7' }}>{p.warehouse ? p.warehouse.name : 'Bilinmiyor'}</td>
-                        </tr>
+              {/* Upcoming */}
+              <Card.Root bg="whiteAlpha.100" borderColor="amber.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+                <Card.Header p={5} pb={2}>
+                  <HStack justify="space-between">
+                    <Card.Title color="amber.300" fontSize="lg" fontWeight="bold">⏳ Yaklaşan Kampanyalar</Card.Title>
+                    <Badge colorPalette="amber" variant="solid" borderRadius="full">{upcomingCampaigns.length}</Badge>
+                  </HStack>
+                </Card.Header>
+                <Card.Body p={5}>
+                  <VStack align="stretch" gap={3}>
+                    {upcomingCampaigns.map(c => (
+                      <HStack key={c.id} justify="space-between" p={3} bg="blackAlpha.400" borderRadius="xl" border="1px solid" borderColor="whiteAlpha.100">
+                        <Box>
+                          <Text color="white" fontWeight="bold" fontSize="sm">{c.product?.name}</Text>
+                          <Text color="amber.400" fontSize="xs">%{c.discount_percentage} İndirim • Kota: {c.campaign_stock}</Text>
+                        </Box>
+                        <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
+                          <FiTrash2 size={13} /> Sil
+                        </Button>
+                      </HStack>
+                    ))}
+                    {upcomingCampaigns.length === 0 && <Text color="whiteAlpha.400" fontSize="sm" py={4} textAlign="center">Yaklaşan kampanya bulunmuyor.</Text>}
+                  </VStack>
+                </Card.Body>
+              </Card.Root>
+
+              {/* Expired */}
+              <Card.Root bg="whiteAlpha.100" borderColor="red.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+                <Card.Header p={5} pb={2}>
+                  <HStack justify="space-between">
+                    <Card.Title color="red.300" fontSize="lg" fontWeight="bold">🔴 Biten Kampanyalar</Card.Title>
+                    <Badge colorPalette="red" variant="solid" borderRadius="full">{expiredCampaigns.length}</Badge>
+                  </HStack>
+                </Card.Header>
+                <Card.Body p={5}>
+                  <VStack align="stretch" gap={3}>
+                    {expiredCampaigns.map(c => (
+                      <HStack key={c.id} justify="space-between" p={3} bg="blackAlpha.400" borderRadius="xl" border="1px solid" borderColor="whiteAlpha.100">
+                        <Box>
+                          <Text color="white" fontWeight="bold" fontSize="sm">{c.product?.name}</Text>
+                          <Text color="red.400" fontSize="xs">Süre doldu / Kota tükendi</Text>
+                        </Box>
+                        <HStack gap={1}>
+                          <Button size="xs" colorPalette="blue" variant="subtle" onClick={() => handleRestartCampaign(c.id)}>
+                            <FiRefreshCw size={13} />
+                          </Button>
+                          <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(c.id)}>
+                            <FiTrash2 size={13} />
+                          </Button>
+                        </HStack>
+                      </HStack>
+                    ))}
+                    {expiredCampaigns.length === 0 && <Text color="whiteAlpha.400" fontSize="sm" py={4} textAlign="center">Biten kampanya bulunmuyor.</Text>}
+                  </VStack>
+                </Card.Body>
+              </Card.Root>
+            </SimpleGrid>
+          </VStack>
+        ) : (
+          <VStack align="stretch" gap={8}>
+            {/* Create Product Card */}
+            <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+              <Card.Header p={6} pb={0}>
+                <HStack justify="space-between" flexWrap="wrap">
+                  <Box>
+                    <Card.Title color="white" fontSize="xl" fontWeight="bold">📦 Yeni Ürün Tanımla</Card.Title>
+                    <Card.Description color="whiteAlpha.600" fontSize="sm">Depoya yeni ürün ekleyin veya Yapay Zeka ile otomatik katalog bilgisi çekin.</Card.Description>
+                  </Box>
+                </HStack>
+              </Card.Header>
+
+              <Card.Body p={6}>
+                <VStack align="stretch" gap={5}>
+                  <Box>
+                    <Text color="whiteAlpha.800" fontSize="sm" mb={2} fontWeight="600">Bağlı Olduğu Depo</Text>
+                    <select
+                      value={prodWarehouseId}
+                      onChange={(e: any) => setProdWarehouseId(e.target.value)}
+                      style={{
+                        background: '#0f0c29',
+                        color: 'white',
+                        padding: '14px 16px',
+                        borderRadius: '12px',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        outline: 'none',
+                        fontSize: '14px',
+                        width: '100%',
+                      }}
+                    >
+                      <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Depo Seçiniz --</option>
+                      {warehouses.map(w => (
+                        <option key={w.id} value={w.id} style={{ background: '#0f0c29', color: 'white' }}>{w.name} ({w.location})</option>
                       ))}
-                    </tbody>
-                  </table>
+                    </select>
+                  </Box>
+
+                  <HStack gap={3}>
+                    <Input
+                      placeholder="Ürün Adı (Örn: iPhone 16 Pro Max)"
+                      size="lg"
+                      borderRadius="xl"
+                      bg="blackAlpha.500"
+                      borderColor="whiteAlpha.200"
+                      color="white"
+                      value={prodName}
+                      onChange={e => setProdName(e.target.value)}
+                    />
+                    <Button
+                      size="lg"
+                      colorPalette="cyan"
+                      variant="solid"
+                      borderRadius="xl"
+                      onClick={handleAutoFill}
+                      loading={isAutoFilling}
+                      disabled={isAutoFilling || !prodName}
+                    >
+                      <FiZap size={18} /> AI ile Doldur
+                    </Button>
+                  </HStack>
+
+                  <Input
+                    placeholder="Açıklama / Özellikler"
+                    size="lg"
+                    borderRadius="xl"
+                    bg="blackAlpha.500"
+                    borderColor="whiteAlpha.200"
+                    color="white"
+                    value={prodDesc}
+                    onChange={e => setProdDesc(e.target.value)}
+                  />
+
+                  <SimpleGrid columns={{ base: 1, md: 3 }} gap={4}>
+                    <Input
+                      placeholder="Orijinal Fiyat (TL)"
+                      type="number"
+                      size="lg"
+                      borderRadius="xl"
+                      bg="blackAlpha.500"
+                      borderColor="whiteAlpha.200"
+                      color="white"
+                      value={prodPrice}
+                      onChange={e => setProdPrice(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Stok Adedi"
+                      type="number"
+                      size="lg"
+                      borderRadius="xl"
+                      bg="blackAlpha.500"
+                      borderColor="whiteAlpha.200"
+                      color="white"
+                      value={prodStock}
+                      onChange={e => setProdStock(e.target.value)}
+                    />
+                    <Input
+                      placeholder="Görsel URL (İsteğe bağlı)"
+                      size="lg"
+                      borderRadius="xl"
+                      bg="blackAlpha.500"
+                      borderColor="whiteAlpha.200"
+                      color="white"
+                      value={prodImage}
+                      onChange={e => setProdImage(e.target.value)}
+                    />
+                  </SimpleGrid>
+
+                  <Button
+                    size="lg"
+                    colorPalette="cyan"
+                    borderRadius="xl"
+                    height="50px"
+                    fontWeight="bold"
+                    onClick={handleAddProduct}
+                    disabled={!prodWarehouseId || !prodName || !prodPrice || !prodStock}
+                  >
+                    <FiPlus size={18} /> Ürünü Kaydet
+                  </Button>
+                </VStack>
+              </Card.Body>
+            </Card.Root>
+
+            {/* Inventory Table Card */}
+            <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+              <Card.Header p={6} pb={2}>
+                <Card.Title color="white" fontSize="xl" fontWeight="bold">📊 Mevcut Ürün Envanteri</Card.Title>
+              </Card.Header>
+              <Card.Body p={6}>
+                <Box overflowX="auto">
+                  <Table.Root size="md" variant="line">
+                    <Table.Header>
+                      <Table.Row borderBottom="1px solid" borderColor="whiteAlpha.200">
+                        <Table.ColumnHeader color="whiteAlpha.600">Ürün Adı</Table.ColumnHeader>
+                        <Table.ColumnHeader color="whiteAlpha.600">Birim Fiyat</Table.ColumnHeader>
+                        <Table.ColumnHeader color="whiteAlpha.600">Mevcut Stok</Table.ColumnHeader>
+                        <Table.ColumnHeader color="whiteAlpha.600">Bağlı Depo</Table.ColumnHeader>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
+                      {products.map(p => (
+                        <Table.Row key={p.id} borderBottom="1px solid" borderColor="whiteAlpha.100">
+                          <Table.Cell color="white" fontWeight="bold">{p.name}</Table.Cell>
+                          <Table.Cell color="emerald.400" fontWeight="bold">₺{p.original_price?.toLocaleString('tr-TR')}</Table.Cell>
+                          <Table.Cell>
+                            <Badge colorPalette={p.stock > 10 ? 'emerald' : 'orange'} variant="subtle">
+                              {p.stock} adet
+                            </Badge>
+                          </Table.Cell>
+                          <Table.Cell color="purple.300">🏢 {p.warehouse ? p.warehouse.name : 'Merkez Depo'}</Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table.Root>
                 </Box>
-              </Box>
-            </VStack>
-          )}
-        </Box>
+              </Card.Body>
+            </Card.Root>
+          </VStack>
+        )}
       </Container>
     </Box>
   );
