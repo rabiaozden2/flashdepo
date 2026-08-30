@@ -626,24 +626,38 @@ export default function SellerPage() {
             </Card.Header>
 
             <Card.Body p={6} pt={0}>
-              <Box overflowX="auto">
+              <Box overflowX="auto" bg="gray.950" p={4} borderRadius="2xl" border="1px solid" borderColor="whiteAlpha.100">
                 <Table.Root size="md" variant="line">
-                  <Table.Header>
+                  <Table.Header bg="gray.900">
                     <Table.Row borderBottom="1px solid" borderColor="whiteAlpha.200">
-                      <Table.ColumnHeader color="whiteAlpha.600">Ürün Adı</Table.ColumnHeader>
-                      <Table.ColumnHeader color="whiteAlpha.600">Birim Fiyat</Table.ColumnHeader>
-                      <Table.ColumnHeader color="whiteAlpha.600">Mevcut Stok</Table.ColumnHeader>
-                      <Table.ColumnHeader color="whiteAlpha.600">Stok Güncelleme</Table.ColumnHeader>
-                      <Table.ColumnHeader color="whiteAlpha.600">Hızlı Satışa Çıkar</Table.ColumnHeader>
+                      <Table.ColumnHeader color="cyan.400" fontWeight="900">Ürün Görseli & Adı</Table.ColumnHeader>
+                      <Table.ColumnHeader color="cyan.400" fontWeight="900">Birim Fiyat</Table.ColumnHeader>
+                      <Table.ColumnHeader color="cyan.400" fontWeight="900">Mevcut Stok</Table.ColumnHeader>
+                      <Table.ColumnHeader color="cyan.400" fontWeight="900">Stok Güncelleme</Table.ColumnHeader>
+                      <Table.ColumnHeader color="cyan.400" fontWeight="900">Hızlı Satışa Çıkar</Table.ColumnHeader>
                     </Table.Row>
                   </Table.Header>
                   <Table.Body>
-                    {products.map(p => (
-                      <Table.Row key={p.id} borderBottom="1px solid" borderColor="whiteAlpha.100">
-                        <Table.Cell color="white" fontWeight="bold">{p.name}</Table.Cell>
-                        <Table.Cell color="emerald.400" fontWeight="bold">₺{p.original_price?.toLocaleString('tr-TR')}</Table.Cell>
+                    {products.map((p, idx) => (
+                      <Table.Row key={p.id || idx} borderBottom="1px solid" borderColor="whiteAlpha.100" _hover={{ bg: 'whiteAlpha.50' }}>
                         <Table.Cell>
-                          <Badge colorPalette={p.stock > 10 ? 'emerald' : p.stock > 0 ? 'orange' : 'red'} variant="subtle">
+                          <HStack gap={3}>
+                            {p.image_url ? (
+                              <img src={p.image_url} alt={p.name} style={{ width: '40px', height: '40px', borderRadius: '10px', objectFit: 'cover' }} />
+                            ) : (
+                              <Box w="40px" h="40px" borderRadius="10px" bg="cyan.500/20" display="flex" alignItems="center" justifyContent="center" color="cyan.300" fontWeight="bold">
+                                📦
+                              </Box>
+                            )}
+                            <VStack align="start" gap={0}>
+                              <Text color="#ffffff" fontSize="sm" fontWeight="bold">{p.name || p.title || `Depo Kalemi #${idx + 1}`}</Text>
+                              <Text color="gray.400" fontSize="2xs">{p.description ? p.description.slice(0, 35) + '...' : 'Canlı Envanter Ürünü'}</Text>
+                            </VStack>
+                          </HStack>
+                        </Table.Cell>
+                        <Table.Cell color="emerald.400" fontWeight="900" fontSize="md">₺{(p.original_price || p.price || 0).toLocaleString('tr-TR')}</Table.Cell>
+                        <Table.Cell>
+                          <Badge colorPalette={p.stock > 10 ? 'emerald' : p.stock > 0 ? 'orange' : 'red'} variant="solid" px={2.5} py={1}>
                             {p.stock <= 0 ? 'Tükendi' : `${p.stock} adet`}
                           </Badge>
                         </Table.Cell>
