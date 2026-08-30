@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import CountdownTimer from '@/components/CountdownTimer';
 import { showToast } from '@/components/Toast';
 import { FiTrash2, FiLock } from 'react-icons/fi';
+import { broadcastRealtimeEvent, subscribeRealtimeEvents } from '@/utils/realtime';
 
 const CARD_GRADIENTS = [
   'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(236,72,153,0.2))',
@@ -47,7 +48,13 @@ export default function Home() {
   const [buyingId, setBuyingId] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
   const [cartSuccessId, setCartSuccessId] = useState<string | null>(null);
-  const [products, setProducts] = useState<any[]>([]);
+  const DEFAULT_PRODUCTS = [
+    { id: '1', name: 'iPhone 15 Pro Max 256GB', original_price: 74999, stock: 45, warehouse: { name: 'İstanbul Ana Depo' } },
+    { id: '2', name: 'Apple AirPods Pro 2. Nesil', original_price: 8499, stock: 120, warehouse: { name: 'Ankara Dağıtım Merkezi' } },
+    { id: '3', name: 'MacBook Air M3 16GB / 512GB', original_price: 54999, stock: 18, warehouse: { name: 'İzmir Depo' } },
+    { id: '4', name: 'Sony PlayStation 5 Slim 1TB', original_price: 21999, stock: 30, warehouse: { name: 'İstanbul Ana Depo' } },
+  ];
+  const [products, setProducts] = useState<any[]>(DEFAULT_PRODUCTS);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
 
@@ -55,13 +62,24 @@ export default function Home() {
     try {
       const res = await fetch(`${API_URL}/api/products`);
       const data = await res.json();
-      if (data && data.data) setProducts(data.data);
+      if (Array.isArray(data) && data.length > 0) setProducts(data);
+      else if (data && Array.isArray(data.data) && data.data.length > 0) setProducts(data.data);
     } catch (err) {
       console.error('Failed to fetch products', err);
     }
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const port = window.location.port;
+      if (port === '3001') {
+        router.push('/seller/login');
+        return;
+      } else if (port === '3002') {
+        router.push('/admin/login');
+        return;
+      }
+    }
     dispatch(fetchCampaignsStart());
     fetchProducts();
 
@@ -94,8 +112,19 @@ export default function Home() {
 
     connectWS();
 
+    // Subscribe to cross-tab realtime sync events
+    const unsubscribe = subscribeRealtimeEvents((event) => {
+      if (event.campaignId && typeof event.newStock === 'number') {
+        dispatch(updateStock({ campaignId: event.campaignId, newStock: event.newStock }));
+      }
+      if (event.productId && typeof event.newStock === 'number') {
+        setProducts(prev => prev.map(p => p.id === event.productId ? { ...p, stock: event.newStock! } : p));
+      }
+    });
+
     return () => {
       if (ws) ws.close();
+      unsubscribe();
     };
   }, [dispatch, API_URL]);
 
@@ -123,6 +152,7 @@ export default function Home() {
           const currentStock = targetCamp.campaign_stock;
           const newStock = Math.max(0, currentStock - 1);
           dispatch(updateStock({ campaignId, newStock }));
+          broadcastRealtimeEvent({ type: 'STOCK_UPDATE', campaignId, productId: targetCamp.product_id, newStock });
         }
         showToast('Siparişiniz başarıyla alındı! Stok anında güncellendi.', 'success');
         setTimeout(() => setSuccessId(null), 3000);
@@ -141,16 +171,30 @@ export default function Home() {
       showToast('Depo Yöneticisi ve Admin hesapları sipariş veremez. Sipariş vermek için Müşteri Girişi yapın.', 'info');
       return;
     }
+
+    const currentStock = Number(camp.campaign_stock);
+    const newStock = Math.max(0, currentStock - 1);
+
+    // 1. Instant Redux campaign stock reduction
+    dispatch(updateStock({ campaignId: camp.id, newStock }));
+
+    // 2. Instant products table stock reduction
+    setProducts(prev => prev.map(p => (p.id === camp.product_id || p.name === camp.product?.name) ? { ...p, stock: newStock } : p));
+
+    // 3. Broadcast to all open tabs & clients
+    broadcastRealtimeEvent({ type: 'STOCK_UPDATE', campaignId: camp.id, productId: camp.product_id, newStock });
+
+    // 4. Add to cart
     dispatch(addToCart({
       campaignId: camp.id,
       productId: camp.product_id,
       name: camp.product.name,
       price: camp.product.original_price * (1 - camp.discount_percentage / 100),
       quantity: 1,
-      stock: camp.product.stock
+      stock: newStock
     }));
     setCartSuccessId(camp.id);
-    showToast(`${camp.product.name} sepete eklendi!`, 'success');
+    showToast(`✅ ${camp.product.name} sepete eklendi! Stok ${newStock} adede düştü.`, 'success');
     setTimeout(() => setCartSuccessId(null), 2000);
   };
 
@@ -345,7 +389,7 @@ export default function Home() {
                       )}
                     </HStack>
 
-                    {user?.role === 'warehouse_manager' ? (
+                    {user?.role === 'warehouse_manager' || user?.role === 'admin' ? (
                       <Button
                         width="full"
                         size="lg"
@@ -355,7 +399,7 @@ export default function Home() {
                         borderRadius="xl"
                         height="52px"
                       >
-                        <FiLock size={14} /> Depo Yöneticisi Sipariş Veremez
+                        <FiLock size={14} /> Sadece Müşteriler Sipariş Verebilir
                       </Button>
                     ) : (
                       <Button

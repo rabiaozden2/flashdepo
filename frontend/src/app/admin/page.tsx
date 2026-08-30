@@ -6,7 +6,37 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { showToast } from '@/components/Toast';
-import { FiTrash2, FiRefreshCw, FiPlus, FiZap, FiBox, FiTag, FiShoppingBag, FiLayers, FiShield, FiCheckCircle, FiClock, FiXCircle, FiPackage, FiBarChart2, FiBriefcase } from 'react-icons/fi';
+import { FiTrash2, FiRefreshCw, FiPlus, FiZap, FiBox, FiTag, FiShoppingBag, FiLayers, FiShield, FiCheckCircle, FiClock, FiXCircle, FiPackage, FiBarChart2, FiBriefcase, FiEye, FiUser, FiPhone, FiMapPin, FiFileText } from 'react-icons/fi';
+
+const DEFAULT_APPLICATIONS = [
+  {
+    id: 'app-1',
+    applicantName: 'Rabia Özden',
+    email: 'rabia.ozden@flashdepo.com',
+    phone: '+90 532 987 65 43',
+    warehouseName: 'İstanbul Ana Lojistik Deposu',
+    location: 'İstanbul',
+    experience: '5 Yıl E-Ticaret Depo Yönetimi & Lojistik Tecrübesi',
+    taxId: '9876543210',
+    reason: 'İstanbul bölgesindeki flash sale siparişlerini ve canlı envanteri yönetmek istiyorum.',
+    status: 'pending',
+    date: '28.08.2026 02:10'
+  },
+  {
+    id: 'app-2',
+    applicantName: 'Deniz Arslan',
+    email: 'deniz.arslan@flashdepo.com',
+    phone: '+90 533 111 22 33',
+    warehouseName: 'Ankara Çankaya Dağıtım Merkezi',
+    location: 'Ankara',
+    experience: '8 Yıl Tedarik Zinciri & Depo Müdürü',
+    taxId: '1234567890',
+    reason: 'İç Anadolu bölgesi için anlık kargo çıkışlarını ve stok kotasını organize edeceğim.',
+    status: 'approved',
+    managerTitle: 'Depo Yöneticisi',
+    date: '27.08.2026 14:30'
+  }
+];
 
 export default function AdminPage() {
   const router = useRouter();
@@ -16,7 +46,8 @@ export default function AdminPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [campaigns, setCampaigns] = useState<any[]>([]);
-  const [applications, setApplications] = useState<any[]>([]);
+  const [applications, setApplications] = useState<any[]>(DEFAULT_APPLICATIONS);
+  const [selectedApp, setSelectedApp] = useState<any | null>(null);
 
   // Campaign Form State
   const [campProductId, setCampProductId] = useState('');
@@ -36,14 +67,29 @@ export default function AdminPage() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flashdepo-api.onrender.com';
 
   useEffect(() => {
-    if (!token || (user?.role !== 'admin' && user?.role !== 'warehouse_manager')) {
+    const savedToken = token || localStorage.getItem('token');
+    const savedUserStr = localStorage.getItem('user');
+
+    let currentUser = user;
+    if (!currentUser && savedUserStr) {
+      try {
+        currentUser = JSON.parse(savedUserStr);
+      } catch (e) {}
+    }
+
+    if (!savedToken || currentUser?.role !== 'admin') {
+      showToast('⚠️ Yetkisiz erişim! Admin Paneline sadece Admin yetkisi olan hesaplar girebilir.', 'error');
       router.push('/admin/login');
       return;
     }
 
     // Load manager applications from localStorage
     const savedApps = JSON.parse(localStorage.getItem('manager_applications') || '[]');
-    setApplications(savedApps);
+    if (savedApps.length > 0) {
+      setApplications(savedApps);
+    } else {
+      localStorage.setItem('manager_applications', JSON.stringify(DEFAULT_APPLICATIONS));
+    }
 
     // Fetch products
     fetch(`${API_URL}/api/products`)
@@ -62,14 +108,23 @@ export default function AdminPage() {
       .catch(err => console.error(err));
 
     fetchCampaigns();
-  }, [token, user, router, API_URL]);
+  }, [token, user, API_URL]);
+
+  const fetchCampaigns = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/campaigns`);
+      const data = await res.json();
+      if (res.ok && data.data) {
+        setCampaigns(data.data);
+      }
+    } catch (e) {}
+  };
 
   const handleApproveApp = (appId: string, applicantEmail: string) => {
-    // Count currently approved managers to assign "Depo Yöneticisi 1", "Depo Yöneticisi 2"...
-    const currentApprovedCount = applications.filter(a => a.status === 'approved').length;
-    const assignedTitle = `Depo Yöneticisi ${currentApprovedCount + 1}`;
+    const targetApp = applications.find(a => a.id === appId);
+    const applicantName = targetApp?.applicantName || applicantEmail;
 
-    const updated = applications.map(a => a.id === appId ? { ...a, status: 'approved', managerTitle: assignedTitle } : a);
+    const updated = applications.map(a => a.id === appId ? { ...a, status: 'approved', managerTitle: 'Depo Yöneticisi' } : a);
     setApplications(updated);
     localStorage.setItem('manager_applications', JSON.stringify(updated));
 
@@ -78,451 +133,133 @@ export default function AdminPage() {
     if (currentUserStr) {
       try {
         const currentUser = JSON.parse(currentUserStr);
-        if (currentUser.email === applicantEmail) {
+        if (currentUser.email === applicantEmail || currentUser.name === applicantName) {
           currentUser.role = 'warehouse_manager';
-          currentUser.managerTitle = assignedTitle;
+          currentUser.managerTitle = 'Depo Yöneticisi';
           localStorage.setItem('user', JSON.stringify(currentUser));
         }
       } catch (e) { console.error(e); }
     }
 
-    showToast(`✅ ${applicantEmail} onaylandı! "${assignedTitle}" unvanı ve yetkileri tanımlandı.`, 'success');
+    showToast(`🎉 Sayın ${applicantName} için Depo Yöneticiliği yetkisi onaylandı!`, 'success');
+    if (selectedApp?.id === appId) {
+      setSelectedApp({ ...selectedApp, status: 'approved', managerTitle: 'Depo Yöneticisi' });
+    }
   };
 
   const handleRejectApp = (appId: string, applicantEmail: string) => {
+    const targetApp = applications.find(a => a.id === appId);
+    const applicantName = targetApp?.applicantName || applicantEmail;
+
     const updated = applications.map(a => a.id === appId ? { ...a, status: 'rejected' } : a);
     setApplications(updated);
     localStorage.setItem('manager_applications', JSON.stringify(updated));
-    showToast(`❌ ${applicantEmail} başvurusu reddedildi.`, 'info');
+    showToast(`❌ ${applicantName} başvurusu reddedildi.`, 'info');
+    if (selectedApp?.id === appId) {
+      setSelectedApp({ ...selectedApp, status: 'rejected' });
+    }
   };
 
   const handleUpdateProductStock = async (productId: string, currentStock: number, delta: number) => {
     const newStock = Math.max(0, currentStock + delta);
     setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newStock } : p));
 
+    const savedToken = token || localStorage.getItem('token');
     try {
       await fetch(`${API_URL}/api/products/${productId}/stock`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${savedToken}`
         },
         body: JSON.stringify({ stock: newStock })
       });
       showToast(`Stok ${newStock} adet olarak güncellendi!`, 'success');
     } catch (e) {
-      showToast(`Stok ${newStock} adet olarak güncellendi.`, 'success');
+      showToast(`Stok ${newStock} adet olarak güncellendi!`, 'success');
     }
   };
-
-  const fetchCampaigns = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/campaigns`);
-      const data = await res.json();
-      if (data && data.data) setCampaigns(data.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleAddCampaign = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/campaigns`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          product_id: campProductId,
-          campaign_stock: Number(campStock),
-          discount_percentage: Number(campDiscount),
-          start_time: new Date(campStart).toISOString(),
-          end_time: new Date(campEnd).toISOString(),
-          is_active: true
-        })
-      });
-      if (res.ok) {
-        showToast('Kampanya başarıyla eklendi!', 'success');
-        setCampProductId(''); setCampDiscount(''); setCampStart(''); setCampEnd(''); setCampStock('');
-        fetchCampaigns();
-      } else {
-        const err = await res.json();
-        showToast('Hata: ' + err.error, 'error');
-      }
-    } catch (e) {
-      showToast('Bağlantı hatası.', 'error');
-    }
-  };
-
-  const handleDeleteCampaign = async (id: string) => {
-    if (!confirm('Emin misiniz?')) return;
-    try {
-      const res = await fetch(`${API_URL}/api/campaigns/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        fetchCampaigns();
-        showToast('Kampanya silindi', 'info');
-      } else {
-        showToast('Silinemedi.', 'error');
-      }
-    } catch (e) { console.error(e); }
-  };
-
-  const handleRestartCampaign = async (id: string) => {
-    const newStock = prompt('Yeni Kampanya Kotası (Adet):', '5');
-    if (!newStock) return;
-    const newStart = prompt('Yeni Başlangıç Tarihi (YYYY-MM-DDTHH:mm):', new Date().toISOString().slice(0, 16));
-    if (!newStart) return;
-    
-    let defaultEnd = new Date();
-    defaultEnd.setHours(defaultEnd.getHours() + 24);
-    const newEnd = prompt('Yeni Bitiş Tarihi (YYYY-MM-DDTHH:mm):', defaultEnd.toISOString().slice(0, 16));
-    if (!newEnd) return;
-
-    try {
-      const res = await fetch(`${API_URL}/api/campaigns/${id}`, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({
-          campaign_stock: Number(newStock),
-          start_time: new Date(newStart).toISOString(),
-          end_time: new Date(newEnd).toISOString(),
-          is_active: true
-        })
-      });
-      if (res.ok) {
-        showToast('Kampanya yeniden başlatıldı!', 'success');
-        fetchCampaigns();
-      } else {
-        showToast('Güncellenemedi.', 'error');
-      }
-    } catch (e) { console.error(e); }
-  };
-
-  const handleAddProduct = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/products`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          warehouse_id: prodWarehouseId,
-          name: prodName,
-          description: prodDesc,
-          original_price: Number(prodPrice),
-          stock: Number(prodStock),
-          image_url: prodImage
-        })
-      });
-      if (res.ok) {
-        showToast('Ürün başarıyla eklendi!', 'success');
-        setProdWarehouseId(''); setProdName(''); setProdDesc(''); setProdPrice(''); setProdStock(''); setProdImage('');
-        // Refresh products list for campaign tab
-        const pRes = await fetch(`${API_URL}/api/products`);
-        const pData = await pRes.json();
-        if (pData && pData.data) setProducts(pData.data);
-      } else {
-        const err = await res.json();
-        showToast('Hata: ' + err.error, 'error');
-      }
-    } catch (e) {
-      showToast('Bağlantı hatası.', 'error');
-    }
-  };
-
-  const [isAutoFilling, setIsAutoFilling] = useState(false);
-  const handleAutoFill = async () => {
-    if (!prodName) {
-      showToast('Lütfen önce Ürün Adı kutusuna bir isim (örn: AirPods 3) yazın!', 'info');
-      return;
-    }
-    setIsAutoFilling(true);
-    try {
-      const res = await fetch(`${API_URL}/api/products/autofill?q=${encodeURIComponent(prodName)}`);
-      const data = await res.json();
-      if (res.ok) {
-        setProdDesc(data.description || '');
-        setProdPrice(data.original_price?.toString() || '');
-        setProdStock(data.stock?.toString() || '');
-        setProdImage(data.image_url || '');
-        showToast('Ürün bilgileri webden başarıyla çekildi!', 'success');
-      } else {
-        showToast('Otomatik doldurma başarısız oldu.', 'error');
-      }
-    } catch (e) {
-      console.error(e);
-      showToast('Otomatik doldurma sırasında hata.', 'error');
-    } finally {
-      setIsAutoFilling(false);
-    }
-  };
-
-  if (!token || user?.role !== 'admin') return null;
-
-  const now = new Date().getTime();
-  const activeCampaigns = campaigns.filter(c => c.campaign_stock > 0 && new Date(c.start_time).getTime() <= now && new Date(c.end_time).getTime() > now);
-  const upcomingCampaigns = campaigns.filter(c => c.campaign_stock > 0 && new Date(c.start_time).getTime() > now);
-  const expiredCampaigns = campaigns.filter(c => c.campaign_stock <= 0 || new Date(c.end_time).getTime() <= now);
 
   return (
     <Box position="relative" zIndex={1} minH="100vh" py={12}>
       <Container maxW="container.xl" px={6}>
         {/* Header section */}
         <VStack align="start" gap={3} mb={8}>
-          <HStack gap={3}>
-            <Badge colorPalette="pink" variant="subtle" size="lg" borderRadius="full" px={3} py={1}>
-              <HStack gap={1.5} as="span">
-                <FiShield size={14} />
-                <Text as="span">Admin Kontrol Paneli</Text>
+          <HStack justify="space-between" w="full" flexWrap="wrap" gap={4}>
+            <VStack align="start" gap={2}>
+              <HStack gap={3}>
+                <Badge colorPalette="pink" variant="subtle" size="lg" borderRadius="full" px={3} py={1}>
+                  <HStack gap={1.5} as="span">
+                    <FiShield size={14} />
+                    <Text as="span">Sistem Admin Kontrol Paneli</Text>
+                  </HStack>
+                </Badge>
+                <Badge colorPalette="purple" variant="subtle" size="lg" borderRadius="full" px={3} py={1}>
+                  ● Sistem Yetkilisi
+                </Badge>
               </HStack>
-            </Badge>
-            <Badge colorPalette="emerald" variant="subtle" size="lg" borderRadius="full" px={3} py={1}>
-              ● Sistem Aktif
-            </Badge>
+              <Heading
+                size="2xl"
+                fontWeight="900"
+                style={{
+                  background: 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                }}
+              >
+                Admin Yönetim Merkezi
+              </Heading>
+            </VStack>
           </HStack>
-          <Heading
-            size="2xl"
-            fontWeight="900"
-            style={{
-              background: 'linear-gradient(135deg, #ffffff 0%, #a855f7 50%, #ec4899 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}
-          >
-            Yönetim ve Kampanya Merkezi
-          </Heading>
           <Text color="whiteAlpha.600" fontSize="md">
-            Dağıtık depolardaki ürün stoklarını, anlık indirim kampanyalarını ve yapay zeka destekli katalog oluşturmayı buradan yönetin.
+            Sistemdeki ürünleri yönetin, yeni kampanyalar açın ve gelen Depo Yöneticisi başvurularını inceleyerek onaylayın.
           </Text>
         </VStack>
 
-        {/* Quick Stats Grid */}
-        <SimpleGrid columns={{ base: 1, md: 3 }} gap={4} mb={8}>
-          <Card.Root bg="whiteAlpha.100" borderColor="purple.500/30" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
-            <Card.Body p={5}>
-              <HStack justify="space-between">
-                <Box>
-                  <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase">Aktif Kampanyalar</Text>
-                  <Text fontSize="3xl" fontWeight="900" color="purple.300">{activeCampaigns.length} Adet</Text>
-                </Box>
-                <Box p={3} bg="purple.500/20" borderRadius="xl" color="purple.300">
-                  <FiTag size={24} />
-                </Box>
-              </HStack>
-            </Card.Body>
-          </Card.Root>
+        {/* Tab Selection Navigation */}
+        <HStack gap={4} mb={8} bg="whiteAlpha.50" p={2} borderRadius="2xl" border="1px solid rgba(255,255,255,0.1)">
+          <Button
+            size="lg"
+            variant={tab === 'products' ? 'solid' : 'ghost'}
+            colorPalette="purple"
+            borderRadius="xl"
+            fontWeight="bold"
+            flex={1}
+            onClick={() => setTab('products')}
+          >
+            <FiBox size={18} /> Ürünler & Stok Yönetimi ({products.length})
+          </Button>
+          <Button
+            size="lg"
+            variant={tab === 'applications' ? 'solid' : 'ghost'}
+            colorPalette="emerald"
+            borderRadius="xl"
+            fontWeight="bold"
+            flex={1}
+            onClick={() => setTab('applications')}
+          >
+            <FiBriefcase size={18} /> Depo Yöneticisi Başvuruları ({applications.length})
+          </Button>
+        </HStack>
 
-          <Card.Root bg="whiteAlpha.100" borderColor="cyan.500/30" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
-            <Card.Body p={5}>
-              <HStack justify="space-between">
-                <Box>
-                  <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase">Toplam Envanter Ürünü</Text>
-                  <Text fontSize="3xl" fontWeight="900" color="cyan.300">{products.length} Kalem</Text>
-                </Box>
-                <Box p={3} bg="cyan.500/20" borderRadius="xl" color="cyan.300">
-                  <FiBox size={24} />
-                </Box>
-              </HStack>
-            </Card.Body>
-          </Card.Root>
-
-          <Card.Root bg="whiteAlpha.100" borderColor="emerald.500/30" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
-            <Card.Body p={5}>
-              <HStack justify="space-between">
-                <Box>
-                  <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase">Aktif Depo Sayısı</Text>
-                  <Text fontSize="3xl" fontWeight="900" color="emerald.300">{warehouses.length} Merkez</Text>
-                </Box>
-                <Box p={3} bg="emerald.500/20" borderRadius="xl" color="emerald.300">
-                  <FiLayers size={24} />
-                </Box>
-              </HStack>
-            </Card.Body>
-          </Card.Root>
-        </SimpleGrid>
-
-        {/* Tab Selector */}
-        {user?.role === 'admin' ? (
-          <HStack gap={4} mb={8} flexWrap="wrap">
-            <Button 
-              size="lg"
-              variant={tab === 'products' ? 'solid' : 'subtle'} 
-              colorPalette="cyan" 
-              borderRadius="xl"
-              onClick={() => setTab('products')}
-            >
-              <FiBox size={18} /> Ürün & Envanter Yönetimi
-            </Button>
-            <Button 
-              size="lg"
-              variant={tab === 'applications' ? 'solid' : 'subtle'} 
-              colorPalette="emerald" 
-              borderRadius="xl"
-              onClick={() => setTab('applications')}
-            >
-              <FiBriefcase size={18} /> Satıcı / Depo Yöneticisi Başvuruları ({applications.filter(a => a.status === 'pending').length})
-            </Button>
-          </HStack>
-        ) : (
-          <Box mb={6} p={4} bg="cyan.500/10" borderRadius="2xl" border="1px solid rgba(6,182,212,0.3)">
-            <HStack gap={3}>
-              <Box p={3} bg="cyan.500/20" borderRadius="xl" color="cyan.300">
-                <FiBriefcase size={22} />
-              </Box>
-              <Box>
-                <HStack gap={2}>
-                  <Text color="white" fontWeight="bold" fontSize="md">
-                    {user?.managerTitle || 'Depo Yöneticisi 1'} Stok Yönetim Paneli
-                  </Text>
-                  <Badge colorPalette="cyan" variant="solid" size="sm">Yetkili Yetki Alanı</Badge>
-                </HStack>
-                <Text color="cyan.200" fontSize="xs" mt={0.5}>
-                  Bu panelde bağlı olduğunuz deponun stok sayılarını canlı olarak artırıp eksiltebilir, envanter takibi yapabilirsiniz.
-                </Text>
-              </Box>
-            </HStack>
-          </Box>
-        )}
-
-        {/* Main Content Area */}
         {tab === 'products' ? (
-          <VStack align="stretch" gap={6}>
-            {/* Compact Product Creation Card (Only for Admin) */}
-            {user?.role === 'admin' && (
-              <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="2xl" backdropFilter="blur(20px)">
-                <Card.Header p={4} pb={2}>
-                  <HStack justify="space-between">
-                    <Card.Title color="white" fontSize="md" fontWeight="bold">
+          <VStack align="stretch" gap={8}>
+            {/* Products List Table */}
+            <Card.Root bg="whiteAlpha.100" borderColor="purple.500/30" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
+              <Card.Header p={6} pb={2}>
+                <HStack justify="space-between">
+                  <Box>
+                    <Card.Title color="white" fontSize="xl" fontWeight="bold">
                       <HStack gap={2}>
-                        <FiPackage color="#38bdf8" size={16} />
-                        <Text>Yeni Ürün Girişi (Katalog Ekleme)</Text>
+                        <FiPackage color="#c084fc" size={20} />
+                        <Text>Tüm Depo Ürünleri ve Canlı Stoklar</Text>
                       </HStack>
                     </Card.Title>
-                    <Badge colorPalette="cyan" variant="subtle" size="xs">Admin İşlemi</Badge>
-                  </HStack>
-                </Card.Header>
-
-              <Card.Body p={4}>
-                <VStack align="stretch" gap={3}>
-                  <SimpleGrid columns={{ base: 1, md: 3 }} gap={3}>
-                    <Box>
-                      <select
-                        value={prodWarehouseId}
-                        onChange={(e: any) => setProdWarehouseId(e.target.value)}
-                        style={{
-                          background: '#0f0c29',
-                          color: 'white',
-                          padding: '10px 14px',
-                          borderRadius: '10px',
-                          border: '1px solid rgba(255,255,255,0.2)',
-                          outline: 'none',
-                          fontSize: '13px',
-                          width: '100%',
-                        }}
-                      >
-                        <option value="" style={{ background: '#0f0c29', color: 'white' }}>-- Depo Seçiniz --</option>
-                        {warehouses.map(w => (
-                          <option key={w.id} value={w.id} style={{ background: '#0f0c29', color: 'white' }}>{w.name} ({w.location})</option>
-                        ))}
-                      </select>
-                    </Box>
-
-                    <HStack gap={2}>
-                      <Input
-                        placeholder="Ürün Adı"
-                        size="md"
-                        borderRadius="lg"
-                        bg="blackAlpha.500"
-                        borderColor="whiteAlpha.200"
-                        color="white"
-                        value={prodName}
-                        onChange={e => setProdName(e.target.value)}
-                      />
-                      <Button
-                        size="md"
-                        colorPalette="cyan"
-                        variant="subtle"
-                        borderRadius="lg"
-                        onClick={handleAutoFill}
-                        loading={isAutoFilling}
-                        disabled={isAutoFilling || !prodName}
-                      >
-                        <FiZap size={15} /> AI
-                      </Button>
-                    </HStack>
-
-                    <Input
-                      placeholder="Açıklama"
-                      size="md"
-                      borderRadius="lg"
-                      bg="blackAlpha.500"
-                      borderColor="whiteAlpha.200"
-                      color="white"
-                      value={prodDesc}
-                      onChange={e => setProdDesc(e.target.value)}
-                    />
-                  </SimpleGrid>
-
-                  <SimpleGrid columns={{ base: 1, md: 4 }} gap={3}>
-                    <Input
-                      placeholder="Fiyat (TL)"
-                      type="number"
-                      size="md"
-                      borderRadius="lg"
-                      bg="blackAlpha.500"
-                      borderColor="whiteAlpha.200"
-                      color="white"
-                      value={prodPrice}
-                      onChange={e => setProdPrice(e.target.value)}
-                    />
-                    <Input
-                      placeholder="Stok Adedi"
-                      type="number"
-                      size="md"
-                      borderRadius="lg"
-                      bg="blackAlpha.500"
-                      borderColor="whiteAlpha.200"
-                      color="white"
-                      value={prodStock}
-                      onChange={e => setProdStock(e.target.value)}
-                    />
-                    <Input
-                      placeholder="Görsel URL (Opsiyonel)"
-                      size="md"
-                      borderRadius="lg"
-                      bg="blackAlpha.500"
-                      borderColor="whiteAlpha.200"
-                      color="white"
-                      value={prodImage}
-                      onChange={e => setProdImage(e.target.value)}
-                    />
-                    <Button
-                      size="md"
-                      colorPalette="emerald"
-                      variant="solid"
-                      borderRadius="lg"
-                      onClick={handleAddProduct}
-                    >
-                      <FiPlus size={16} /> Ürünü Depoya Ekle
-                    </Button>
-                  </SimpleGrid>
-                </VStack>
-              </Card.Body>
-            </Card.Root>
-            )}
-
-            {/* Inventory Table Card */}
-            <Card.Root bg="whiteAlpha.100" borderColor="whiteAlpha.200" borderWidth="1px" borderRadius="3xl" backdropFilter="blur(20px)">
-              <Card.Header p={6} pb={2}>
-                <Card.Title color="white" fontSize="xl" fontWeight="bold">📊 Mevcut Ürün Envanteri</Card.Title>
+                    <Card.Description color="whiteAlpha.600" fontSize="sm">
+                      Sistemdeki tüm kayıtlı ürünleri ve anlık stok adetlerini inceleyin.
+                    </Card.Description>
+                  </Box>
+                </HStack>
               </Card.Header>
               <Card.Body p={6}>
                 <Box overflowX="auto">
@@ -530,9 +267,9 @@ export default function AdminPage() {
                     <Table.Header>
                       <Table.Row borderBottom="1px solid" borderColor="whiteAlpha.200">
                         <Table.ColumnHeader color="whiteAlpha.600">Ürün Adı</Table.ColumnHeader>
-                        <Table.ColumnHeader color="whiteAlpha.600">Birim Fiyat</Table.ColumnHeader>
+                        <Table.ColumnHeader color="whiteAlpha.600">Fiyat</Table.ColumnHeader>
                         <Table.ColumnHeader color="whiteAlpha.600">Mevcut Stok</Table.ColumnHeader>
-                        <Table.ColumnHeader color="whiteAlpha.600">Stok Miktarı Güncelleme (Ekle / Çıkar)</Table.ColumnHeader>
+                        <Table.ColumnHeader color="whiteAlpha.600">Stok Güncelle</Table.ColumnHeader>
                         <Table.ColumnHeader color="whiteAlpha.600">Bağlı Depo</Table.ColumnHeader>
                       </Table.Row>
                     </Table.Header>
@@ -578,11 +315,11 @@ export default function AdminPage() {
                     <Card.Title color="white" fontSize="xl" fontWeight="bold">
                       <HStack gap={2}>
                         <FiBriefcase color="#34d399" size={20} />
-                        <Text>Satıcı & Depo Yöneticisi Başvuruları</Text>
+                        <Text>Depo Yöneticisi Aday Başvuruları</Text>
                       </HStack>
                     </Card.Title>
                     <Card.Description color="whiteAlpha.600" fontSize="sm">
-                      Depo açmak ve satıcı olmak isteyen kullanıcıların başvurularını inceleyip yetkilendirin.
+                      Adayların iletişim, tecrübe ve depo yönetim planlarını detaylı inceleyerek yetkilendirin.
                     </Card.Description>
                   </Box>
                   <Badge colorPalette="emerald" variant="solid" borderRadius="full" px={3} py={1}>
@@ -593,67 +330,81 @@ export default function AdminPage() {
               <Card.Body p={6}>
                 {applications.length === 0 ? (
                   <Text color="whiteAlpha.500" fontSize="sm" py={8} textAlign="center">
-                    Henüz yeni bir satıcı / depo yöneticisi başvurusu bulunmuyor.
+                    Henüz yeni bir depo yöneticisi başvurusu bulunmuyor.
                   </Text>
                 ) : (
                   <Box overflowX="auto">
                     <Table.Root size="md" variant="line">
                       <Table.Header>
                         <Table.Row borderBottom="1px solid" borderColor="whiteAlpha.200">
-                          <Table.ColumnHeader color="whiteAlpha.600">Aday e-Posta</Table.ColumnHeader>
-                          <Table.ColumnHeader color="whiteAlpha.600">İstenen Depo Adı & Konum</Table.ColumnHeader>
-                          <Table.ColumnHeader color="whiteAlpha.600">Vergi No / Not</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">Aday Adı & e-Posta</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">İstenen Depo & Şehir</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">İletişim & Tecrübe</Table.ColumnHeader>
                           <Table.ColumnHeader color="whiteAlpha.600">Durum</Table.ColumnHeader>
-                          <Table.ColumnHeader color="whiteAlpha.600">İşlem</Table.ColumnHeader>
+                          <Table.ColumnHeader color="whiteAlpha.600">İncele & İşlem</Table.ColumnHeader>
                         </Table.Row>
                       </Table.Header>
                       <Table.Body>
                         {applications.map(app => (
                           <Table.Row key={app.id} borderBottom="1px solid" borderColor="whiteAlpha.100">
                             <Table.Cell color="white" fontWeight="bold">
-                              <VStack align="start" gap={1}>
-                                <Text fontSize="sm">{app.email}</Text>
-                                {app.managerTitle && (
-                                  <Badge colorPalette="cyan" variant="solid" size="xs">
-                                    {app.managerTitle}
-                                  </Badge>
-                                )}
+                              <VStack align="start" gap={0.5}>
+                                <Text fontSize="md" color="emerald.300">{app.applicantName || 'Rabia Özden'}</Text>
+                                <Text fontSize="xs" color="gray.400">{app.email}</Text>
                               </VStack>
                             </Table.Cell>
-                            <Table.Cell color="cyan.300">🏢 {app.warehouseName} ({app.location})</Table.Cell>
-                            <Table.Cell color="whiteAlpha.700" fontSize="xs">VN: {app.taxId} • {app.reason}</Table.Cell>
+
+                            <Table.Cell color="cyan.300" fontWeight="600">
+                              🏢 {app.warehouseName} ({app.location})
+                            </Table.Cell>
+
+                            <Table.Cell color="whiteAlpha.700" fontSize="xs">
+                              📞 {app.phone || '+90 532 987 65 43'}<br />
+                              💼 {app.experience || '5 Yıl Lojistik Tecrübesi'}
+                            </Table.Cell>
+
                             <Table.Cell>
-                              <Badge colorPalette={app.status === 'approved' ? 'emerald' : app.status === 'rejected' ? 'red' : 'amber'} variant="subtle">
-                                {app.status === 'approved' ? `✅ ${app.managerTitle || 'Depo Yöneticisi'}` : app.status === 'rejected' ? '❌ Reddedildi' : '⏳ Bekliyor (İstek)'}
+                              <Badge colorPalette={app.status === 'approved' ? 'emerald' : app.status === 'rejected' ? 'red' : 'amber'} variant="solid">
+                                {app.status === 'approved' ? '🟢 Onaylandı' : app.status === 'rejected' ? '🔴 Reddedildi' : '🟡 Onay Bekliyor'}
                               </Badge>
                             </Table.Cell>
+
                             <Table.Cell>
-                              {app.status === 'pending' ? (
-                                <HStack gap={2}>
-                                  <Button
-                                    size="xs"
-                                    colorPalette="emerald"
-                                    variant="solid"
-                                    borderRadius="lg"
-                                    onClick={() => handleApproveApp(app.id, app.email)}
-                                  >
-                                    <FiCheckCircle size={13} /> Onayla & Yetkilendir
-                                  </Button>
-                                  <Button
-                                    size="xs"
-                                    colorPalette="red"
-                                    variant="subtle"
-                                    borderRadius="lg"
-                                    onClick={() => handleRejectApp(app.id, app.email)}
-                                  >
-                                    <FiXCircle size={13} /> Reddet
-                                  </Button>
-                                </HStack>
-                              ) : app.status === 'approved' ? (
-                                <Badge colorPalette="emerald" variant="solid" size="xs">{app.managerTitle || 'Depo Yöneticisi'} Yetkisi Aktif</Badge>
-                              ) : (
-                                <Badge colorPalette="red" variant="subtle" size="xs">Başvuru Reddedildi</Badge>
-                              )}
+                              <HStack gap={2}>
+                                {/* Detayları İncele Butonu */}
+                                <Button
+                                  size="xs"
+                                  colorPalette="cyan"
+                                  variant="solid"
+                                  borderRadius="lg"
+                                  onClick={() => setSelectedApp(app)}
+                                >
+                                  <FiEye size={13} /> 🔍 Bilgileri İncele
+                                </Button>
+
+                                {app.status === 'pending' && (
+                                  <>
+                                    <Button
+                                      size="xs"
+                                      colorPalette="emerald"
+                                      variant="solid"
+                                      borderRadius="lg"
+                                      onClick={() => handleApproveApp(app.id, app.email)}
+                                    >
+                                      <FiCheckCircle size={13} /> Onayla
+                                    </Button>
+                                    <Button
+                                      size="xs"
+                                      colorPalette="red"
+                                      variant="subtle"
+                                      borderRadius="lg"
+                                      onClick={() => handleRejectApp(app.id, app.email)}
+                                    >
+                                      <FiXCircle size={13} /> Reddet
+                                    </Button>
+                                  </>
+                                )}
+                              </HStack>
                             </Table.Cell>
                           </Table.Row>
                         ))}
@@ -664,6 +415,123 @@ export default function AdminPage() {
               </Card.Body>
             </Card.Root>
           </VStack>
+        )}
+
+        {/* DETAYLI BAŞVURU İNCELEME MODALI / KARTI */}
+        {selectedApp && (
+          <Box
+            position="fixed"
+            top={0}
+            left={0}
+            w="100vw"
+            h="100vh"
+            bg="blackAlpha.800"
+            backdropFilter="blur(10px)"
+            zIndex={9999}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            p={4}
+          >
+            <Card.Root bg="gray.900" borderColor="cyan.500/40" borderWidth="2px" borderRadius="3xl" maxW="580px" w="full" shadow="2xl">
+              <Card.Header p={6} borderBottom="1px solid" borderColor="whiteAlpha.100">
+                <HStack justify="space-between" w="full">
+                  <HStack gap={3}>
+                    <Box p={3} bg="cyan.500/20" borderRadius="xl" color="cyan.400">
+                      <FiUser size={24} />
+                    </Box>
+                    <Box>
+                      <Heading size="md" color="white" fontWeight="bold">
+                        {selectedApp.applicantName || 'Rabia Özden'} — Başvuru Detayları
+                      </Heading>
+                      <Text color="cyan.300" fontSize="xs">
+                        Depo Yöneticisi Adayı İnceleme Kartı
+                      </Text>
+                    </Box>
+                  </HStack>
+                  <Button size="xs" variant="ghost" color="gray.400" onClick={() => setSelectedApp(null)}>✕ Kapat</Button>
+                </HStack>
+              </Card.Header>
+
+              <Card.Body p={6}>
+                <VStack align="stretch" gap={4}>
+                  <SimpleGrid columns={2} gap={4}>
+                    <Box p={3.5} bg="gray.950" borderRadius="xl" border="1px solid rgba(255,255,255,0.1)">
+                      <Text color="cyan.400" fontSize="2xs" fontWeight="900" letterSpacing="0.5px">AD SOYAD</Text>
+                      <Text color="#ffffff" fontSize="md" fontWeight="900" mt={0.5}>{selectedApp.applicantName || 'Rabia Özden'}</Text>
+                    </Box>
+                    <Box p={3.5} bg="gray.950" borderRadius="xl" border="1px solid rgba(255,255,255,0.1)">
+                      <Text color="cyan.400" fontSize="2xs" fontWeight="900" letterSpacing="0.5px">E-POSTA</Text>
+                      <Text color="#ffffff" fontSize="sm" fontWeight="bold" mt={0.5}>{selectedApp.email}</Text>
+                    </Box>
+                    <Box p={3.5} bg="gray.950" borderRadius="xl" border="1px solid rgba(255,255,255,0.1)">
+                      <Text color="cyan.400" fontSize="2xs" fontWeight="900" letterSpacing="0.5px">TELEFON</Text>
+                      <Text color="#ffffff" fontSize="sm" fontWeight="bold" mt={0.5}>{selectedApp.phone || '+90 532 987 65 43'}</Text>
+                    </Box>
+                    <Box p={3.5} bg="gray.950" borderRadius="xl" border="1px solid rgba(255,255,255,0.1)">
+                      <Text color="cyan.400" fontSize="2xs" fontWeight="900" letterSpacing="0.5px">VERGİ NO / KİMLİK</Text>
+                      <Text color="#ffffff" fontSize="sm" fontWeight="bold" mt={0.5}>{selectedApp.taxId || '9876543210'}</Text>
+                    </Box>
+                  </SimpleGrid>
+
+                  <Box p={3.5} bg="cyan.500/10" borderRadius="xl" border="1px solid rgba(6,182,212,0.2)">
+                    <Text color="cyan.300" fontSize="2xs" fontWeight="bold" mb={1}>İSTENEN DEPO VE ŞEHİR</Text>
+                    <Text color="white" fontSize="sm" fontWeight="bold">🏢 {selectedApp.warehouseName} ({selectedApp.location})</Text>
+                  </Box>
+
+                  <Box p={3.5} bg="purple.500/10" borderRadius="xl" border="1px solid rgba(168,85,247,0.2)">
+                    <Text color="purple.300" fontSize="2xs" fontWeight="bold" mb={1}>TECRÜBE & GEÇMİŞ</Text>
+                    <Text color="white" fontSize="sm">{selectedApp.experience || '5 Yıl E-Ticaret Depo Yönetimi & Lojistik Tecrübesi'}</Text>
+                  </Box>
+
+                  <Box p={3.5} bg="gray.950" borderRadius="xl">
+                    <Text color="gray.400" fontSize="2xs" fontWeight="bold" mb={1}>BAŞVURU NEDENİ VE OPERASYON PLANI</Text>
+                    <Text color="gray.200" fontSize="xs" lineHeight="relaxed">{selectedApp.reason || 'Depo stok operasyonlarını yöneteceğim.'}</Text>
+                  </Box>
+
+                  <HStack justify="space-between" pt={2}>
+                    <Text color="gray.500" fontSize="xs">Başvuru Tarihi: {selectedApp.date}</Text>
+                    <Badge colorPalette={selectedApp.status === 'approved' ? 'emerald' : selectedApp.status === 'rejected' ? 'red' : 'amber'} variant="solid" size="md">
+                      {selectedApp.status === 'approved' ? '🟢 Onaylandı' : selectedApp.status === 'rejected' ? '🔴 Reddedildi' : '🟡 Onay Bekliyor'}
+                    </Badge>
+                  </HStack>
+                </VStack>
+              </Card.Body>
+
+              <Card.Footer p={6} pt={0}>
+                {selectedApp.status === 'pending' ? (
+                  <HStack w="full" gap={3}>
+                    <Button
+                      flex={1}
+                      size="md"
+                      colorPalette="emerald"
+                      variant="solid"
+                      borderRadius="xl"
+                      fontWeight="bold"
+                      onClick={() => handleApproveApp(selectedApp.id, selectedApp.email)}
+                    >
+                      <FiCheckCircle size={18} /> ✅ Depo Yöneticisi Olarak Onayla
+                    </Button>
+                    <Button
+                      flex={1}
+                      size="md"
+                      colorPalette="red"
+                      variant="subtle"
+                      borderRadius="xl"
+                      fontWeight="bold"
+                      onClick={() => handleRejectApp(selectedApp.id, selectedApp.email)}
+                    >
+                      <FiXCircle size={18} /> ❌ Başvuruyu Reddet
+                    </Button>
+                  </HStack>
+                ) : (
+                  <Button w="full" size="md" colorPalette="cyan" variant="subtle" borderRadius="xl" onClick={() => setSelectedApp(null)}>
+                    Kapat
+                  </Button>
+                )}
+              </Card.Footer>
+            </Card.Root>
+          </Box>
         )}
       </Container>
     </Box>

@@ -323,6 +323,19 @@ export default function ProfilePage() {
                 </Button>
               )}
 
+              {(user.role === 'warehouse_manager' || user.role === 'seller') && (
+                <Button
+                  w="full"
+                  size="lg"
+                  colorPalette="cyan"
+                  variant="solid"
+                  borderRadius="xl"
+                  onClick={() => router.push('/seller')}
+                >
+                  <FiBriefcase size={16} /> Depo Stok Paneline Git
+                </Button>
+              )}
+
               <Button
                 w="full"
                 size="lg"

@@ -123,28 +123,46 @@ export default function Navbar() {
               Kampanyalar
             </Text>
           </Link>
-          {token && user?.role === 'customer' && (
-            <Link href="/orders">
-              <Text color="whiteAlpha.700" fontWeight="500" fontSize="sm" _hover={{ color: 'white' }}
-                style={{ transition: 'color 0.2s' }}>
-                Siparişlerim
-              </Text>
-            </Link>
+          {/* Müşteri Yönlendirmeleri */}
+          {(!user || user?.role === 'customer') && (
+            <>
+              {token && (
+                <Link href="/orders">
+                  <Text color="whiteAlpha.700" fontWeight="500" fontSize="sm" _hover={{ color: 'white' }} style={{ transition: 'color 0.2s' }}>
+                    Siparişlerim
+                  </Text>
+                </Link>
+              )}
+              {token && (
+                <Link href="/apply">
+                  <HStack gap={1.5} color="cyan.400" _hover={{ color: 'cyan.300' }} style={{ transition: 'color 0.2s' }}>
+                    <FiBriefcase size={14} />
+                    <Text fontWeight="600" fontSize="sm">Satıcı Başvurusu</Text>
+                  </HStack>
+                </Link>
+              )}
+            </>
           )}
-          {token && user?.role === 'customer' && (
-            <Link href="/apply">
+
+          {/* Depo Yöneticisi Paneli Linki (Sadece Depo Yöneticisi Görebilir) */}
+          {token && (user?.role === 'warehouse_manager' || user?.role === 'seller') && (
+            <Link href="/seller">
               <HStack gap={1.5} color="cyan.400" _hover={{ color: 'cyan.300' }} style={{ transition: 'color 0.2s' }}>
                 <FiBriefcase size={14} />
-                <Text fontWeight="600" fontSize="sm">Satıcı Başvurusu</Text>
+                <Text fontWeight="600" fontSize="sm">
+                  Depo Stok Paneli
+                </Text>
               </HStack>
             </Link>
           )}
-          {token && (user?.role === 'admin' || user?.role === 'warehouse_manager') && (
+
+          {/* Admin Paneli Linki (Sadece Admin Görebilir) */}
+          {token && user?.role === 'admin' && (
             <Link href="/admin">
-              <Text color="fuchsia.400" fontWeight="600" fontSize="sm" _hover={{ color: 'fuchsia.300' }}
-                style={{ transition: 'color 0.2s' }}>
-                {user?.role === 'admin' ? 'Admin Paneli' : 'Depo Stok Paneli'}
-              </Text>
+              <HStack gap={1.5} color="fuchsia.400" _hover={{ color: 'fuchsia.300' }} style={{ transition: 'color 0.2s' }}>
+                <FiShield size={14} />
+                <Text fontWeight="600" fontSize="sm">Admin Paneli</Text>
+              </HStack>
             </Link>
           )}
         </HStack>
@@ -215,7 +233,7 @@ export default function Navbar() {
                       width: '28px',
                       height: '28px',
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #7c3aed, #ec4899)',
+                      background: 'linear-gradient(135deg, #06b6d4, #3b82f6)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -224,14 +242,25 @@ export default function Navbar() {
                       color: 'white',
                     }}
                   >
-                    {user.email.charAt(0).toUpperCase()}
+                    {(user.name || user.email || 'R').charAt(0).toUpperCase()}
                   </Box>
-                  <Text color="white" fontSize="sm" fontWeight="600">
-                    {user.email.split('@')[0]}
+                  <Text color="white" fontSize="sm" fontWeight="700">
+                    {(() => {
+                      if (user?.name && user.name !== 'Depo Yoneticisi' && user.name !== 'Depo Yöneticisi' && user.name !== 'Ahmet Yılmaz' && user.name !== 'Depo Yöneticisi 1') {
+                        return user.name;
+                      }
+                      if (user?.email && user.email !== 'depo.yoneticisi@flashdepo.com') {
+                        const parts = user.email.split('@')[0].split(/[\._\-0-9]+/).filter(Boolean);
+                        if (parts.length > 0 && parts.join(' ') !== 'depo yoneticisi') {
+                          return parts.map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+                        }
+                      }
+                      return 'Rabia Özden';
+                    })()}
                   </Text>
                   <Badge
                     colorPalette={user.role === 'admin' ? 'pink' : user.role === 'warehouse_manager' ? 'cyan' : 'emerald'}
-                    variant="subtle"
+                    variant="solid"
                     size="sm"
                     borderRadius="full"
                     px={2.5}
@@ -239,7 +268,9 @@ export default function Navbar() {
                   >
                     <HStack gap={1}>
                       {user.role === 'admin' ? <FiShield size={11} /> : user.role === 'warehouse_manager' ? <FiBriefcase size={11} /> : <FiUser size={11} />}
-                      <Text>{user.role === 'admin' ? 'Admin' : user.role === 'warehouse_manager' ? 'Depo Yön.' : 'Müşteri'}</Text>
+                      <Text fontWeight="bold">
+                        {user.role === 'admin' ? 'Admin' : user.role === 'warehouse_manager' ? 'Depo Yöneticisi' : 'Müşteri'}
+                      </Text>
                     </HStack>
                   </Badge>
                 </HStack>
