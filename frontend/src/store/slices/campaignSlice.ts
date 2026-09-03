@@ -170,11 +170,12 @@ const campaignSlice = createSlice({
         },
         fetchCampaignsSuccess(state, action: PayloadAction<Campaign[]>) {
             state.loading = false;
+            const map = new Map<string, Campaign>();
+            DEFAULT_CAMPAIGNS.forEach(c => map.set(c.id || c.product_id, c));
             if (action.payload && action.payload.length > 0) {
-                state.campaigns = action.payload;
-            } else if (!state.campaigns || state.campaigns.length === 0) {
-                state.campaigns = DEFAULT_CAMPAIGNS;
+                action.payload.forEach(c => map.set(c.id || c.product_id, c));
             }
+            state.campaigns = Array.from(map.values());
         },
         fetchCampaignsFailure(state, action: PayloadAction<string>) {
             state.loading = false;

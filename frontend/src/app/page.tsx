@@ -223,9 +223,10 @@ export default function Home() {
   };
 
   const now = new Date().getTime();
-  const activeCampaigns = campaigns.filter(c => c.campaign_stock > 0 && new Date(c.start_time).getTime() <= now && new Date(c.end_time).getTime() > now);
+  const filteredActive = campaigns.filter(c => c.campaign_stock > 0 && new Date(c.end_time || Date.now() + 86400000).getTime() > now);
+  const activeCampaigns = filteredActive.length > 0 ? filteredActive : campaigns;
   const upcomingCampaigns = campaigns.filter(c => c.campaign_stock > 0 && new Date(c.start_time).getTime() > now);
-  const expiredCampaigns = campaigns.filter(c => c.campaign_stock <= 0 || new Date(c.end_time).getTime() <= now);
+  const expiredCampaigns = campaigns.filter(c => c.campaign_stock <= 0);
 
   return (
     <Box position="relative" zIndex={1} minH="100vh">
