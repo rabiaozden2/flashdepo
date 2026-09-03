@@ -314,12 +314,13 @@ export default function Home() {
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={6}>
             {activeCampaigns.map((camp, i) => {
               const idx = i % CARD_GRADIENTS.length;
-              const prodName = camp.product?.name || camp.name || 'Özel Flaş Ürün';
-              const origPrice = Number(camp.product?.original_price || camp.original_price || camp.price || 10000);
-              const discPercent = Number(camp.discount_percentage || 20);
+              const cAny = camp as any;
+              const prodName = cAny.product?.name || cAny.name || 'Özel Flaş Ürün';
+              const origPrice = Number(cAny.product?.original_price || cAny.original_price || cAny.price || 10000);
+              const discPercent = Number(cAny.discount_percentage || 20);
               const discountedPrice = Math.round(origPrice * (1 - discPercent / 100));
-              const prodDesc = camp.product?.description || camp.description || 'Dağıtık Depo Flaş İndirim Fırsatı';
-              const imgUrl = camp.product?.image_url || camp.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
+              const prodDesc = cAny.product?.description || cAny.description || 'Dağıtık Depo Flaş İndirim Fırsatı';
+              const imgUrl = cAny.product?.image_url || cAny.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
               const isOutOfStock = camp.campaign_stock <= 0;
               const isBuying = buyingId === camp.id;
               const isSuccess = successId === camp.id;
