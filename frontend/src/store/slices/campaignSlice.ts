@@ -131,6 +131,26 @@ const DEFAULT_CAMPAIGNS: Campaign[] = [
     start_time: past,
     end_time: tomorrow,
     is_active: true
+  },
+  {
+    id: 'camp-11',
+    product_id: '11',
+    product: { id: '11', warehouse_id: 'wh-2', name: 'Meta Quest 3 128GB VR Başlık', description: 'Karma gerçeklik deneyimi, 4K+ sonsuz ekran ve Touch Plus kumandalar.', original_price: 24999, stock: 35, image_url: 'https://images.unsplash.com/photo-1622979135225-d2ba269bc1bd?auto=format&fit=crop&w=800&q=80' },
+    campaign_stock: 35,
+    discount_percentage: 28,
+    start_time: past,
+    end_time: tomorrow,
+    is_active: true
+  },
+  {
+    id: 'camp-12',
+    product_id: '12',
+    product: { id: '12', warehouse_id: 'wh-3', name: 'Nespresso Vertuo Pop Kahve Makinesi', description: 'Centrifusion teknolojisi ile zengin kremsi espresso ve 5 farklı fincan boyutu.', original_price: 6499, stock: 80, image_url: 'https://images.unsplash.com/photo-1517668808822-9ebe02f2a6e8?auto=format&fit=crop&w=800&q=80' },
+    campaign_stock: 80,
+    discount_percentage: 40,
+    start_time: past,
+    end_time: tomorrow,
+    is_active: true
   }
 ];
 
