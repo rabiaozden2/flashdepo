@@ -49,6 +49,14 @@ const campaignSlice = createSlice({
             state.loading = false;
             state.error = action.payload;
         },
+        addCampaign(state, action: PayloadAction<Campaign>) {
+            const exists = state.campaigns.some(c => c.id === action.payload.id || c.product_id === action.payload.product_id);
+            if (!exists) {
+                state.campaigns.unshift(action.payload);
+            } else {
+                state.campaigns = state.campaigns.map(c => (c.id === action.payload.id || c.product_id === action.payload.product_id) ? action.payload : c);
+            }
+        },
         updateStock(state, action: PayloadAction<{ campaignId: string; newStock: number }>) {
             const campaign = state.campaigns.find(c => c.id === action.payload.campaignId);
             if (campaign) {
@@ -61,5 +69,5 @@ const campaignSlice = createSlice({
     },
 });
 
-export const { fetchCampaignsStart, fetchCampaignsSuccess, fetchCampaignsFailure, updateStock } = campaignSlice.actions;
+export const { fetchCampaignsStart, fetchCampaignsSuccess, fetchCampaignsFailure, addCampaign, updateStock } = campaignSlice.actions;
 export default campaignSlice.reducer;

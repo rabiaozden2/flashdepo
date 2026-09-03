@@ -232,16 +232,45 @@ export default function SellerPage() {
     } catch (e) {}
   };
 
-  const handleLaunchCampaign = async () => {
-    const targetProduct = products.find(p => p.id === selectedProductId) || products[0];
+  const handleLaunchCampaign = async (productOverride?: any, customDiscount?: number, customStock?: number) => {
+    const targetProduct = productOverride || products.find(p => p.id === selectedProductId) || products[0];
     if (!targetProduct) {
       showToast('Lütfen önce satışa çıkarılacak bir ürün seçin.', 'error');
       return;
     }
 
     setIsLaunching(true);
+    const discount = customDiscount || Number(discountPercent) || 20;
+    const stockQuota = customStock || Number(campaignQuota) || targetProduct.stock || 10;
     const now = new Date();
     const endTime = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+    const newCampaignObj = {
+      id: `camp-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      product_id: targetProduct.id,
+      product: {
+        id: targetProduct.id,
+        warehouse_id: targetProduct.warehouse_id || 'wh-1',
+        name: targetProduct.name,
+        description: targetProduct.description || `${targetProduct.name} flash sale özel indirim fırsatı.`,
+        original_price: targetProduct.original_price || targetProduct.price || 10000,
+        stock: stockQuota,
+        image_url: targetProduct.image_url
+      },
+      campaign_stock: stockQuota,
+      discount_percentage: discount,
+      start_time: now.toISOString(),
+      end_time: endTime.toISOString(),
+      is_active: true
+    };
+
+    dispatch(addCampaign(newCampaignObj));
+
+    try {
+      const existingCustom = JSON.parse(localStorage.getItem('custom_campaigns') || '[]');
+      const filtered = existingCustom.filter((c: any) => c.product_id !== targetProduct.id && c.id !== newCampaignObj.id);
+      localStorage.setItem('custom_campaigns', JSON.stringify([newCampaignObj, ...filtered]));
+    } catch (e) {}
 
     const savedToken = token || localStorage.getItem('token');
     try {
@@ -253,8 +282,8 @@ export default function SellerPage() {
         },
         body: JSON.stringify({
           product_id: targetProduct.id,
-          campaign_stock: Number(campaignQuota),
-          discount_percentage: Number(discountPercent),
+          campaign_stock: stockQuota,
+          discount_percentage: discount,
           start_time: now.toISOString(),
           end_time: endTime.toISOString(),
           is_active: true
@@ -263,8 +292,8 @@ export default function SellerPage() {
     } catch (e) {}
 
     dispatch(fetchCampaignsStart());
-    broadcastRealtimeEvent({ type: 'PRODUCT_ADDED', productId: targetProduct.id, newStock: Number(campaignQuota) });
-    showToast(`🔥 "${targetProduct.name}" %${discountPercent} İndirimle Anasayfada Canlı Satışa Çıkarıldı!`, 'success');
+    broadcastRealtimeEvent({ type: 'PRODUCT_ADDED', productId: targetProduct.id, campaignId: newCampaignObj.id, newStock: stockQuota });
+    showToast(`🔥 "${targetProduct.name}" %${discount} İndirimle Anasayfada Canlı Satışa Çıkarıldı!`, 'success');
     setIsLaunching(false);
   };
 
@@ -678,14 +707,15 @@ export default function SellerPage() {
                           <Button
                             size="xs"
                             colorPalette="pink"
-                            variant="subtle"
+                            variant="solid"
                             borderRadius="md"
+                            fontWeight="bold"
                             onClick={() => {
                               setSelectedProductId(p.id);
-                              showToast(`🔥 "${p.name}" satış seçimine alındı. Yukarıdaki formu kullanarak hemen satışa çıkarabilirsiniz!`, 'info');
+                              handleLaunchCampaign(p, Number(discountPercent) || 25, Number(campaignQuota) || p.stock || 15);
                             }}
                           >
-                            <FiTag size={12} /> Satışa Çıkar
+                            <FiTag size={12} /> 🔥 Satışa Çıkar
                           </Button>
                         </Table.Cell>
                       </Table.Row>
