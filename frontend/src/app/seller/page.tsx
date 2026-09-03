@@ -11,11 +11,16 @@ import { FiBriefcase, FiPlus, FiMinus, FiPackage, FiZap, FiTag, FiShoppingBag, F
 import { broadcastRealtimeEvent, subscribeRealtimeEvents } from '@/utils/realtime';
 
 const INITIAL_PRODUCTS = [
-  { id: '1', name: 'iPhone 15 Pro Max 256GB', original_price: 74999, stock: 45, warehouse: { name: 'İstanbul Ana Depo' } },
-  { id: '2', name: 'Apple AirPods Pro 2. Nesil', original_price: 8499, stock: 120, warehouse: { name: 'Ankara Dağıtım Merkezi' } },
-  { id: '3', name: 'MacBook Air M3 16GB / 512GB', original_price: 54999, stock: 18, warehouse: { name: 'İzmir Depo' } },
-  { id: '4', name: 'Sony PlayStation 5 Slim 1TB', original_price: 21999, stock: 30, warehouse: { name: 'İstanbul Ana Depo' } },
-  { id: '5', name: 'Samsung Galaxy S24 Ultra 512GB', original_price: 69999, stock: 25, warehouse: { name: 'Bursa Lojistik Merkezi' } },
+  { id: '1', name: 'iPhone 15 Pro Max 256GB', description: 'Titanyum kasa, A17 Pro çip ve 5X optik zoom kamerayla yeni nesil akıllı telefon.', original_price: 74999, stock: 45, image_url: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'İstanbul Ana Depo' } },
+  { id: '2', name: 'Apple AirPods Pro 2. Nesil', description: 'Gelişmiş aktif gürültü engelleme ve şeffaf mod ile eşsiz ses deneyimi.', original_price: 8499, stock: 120, image_url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'Ankara Dağıtım Merkezi' } },
+  { id: '3', name: 'MacBook Air M3 16GB / 512GB', description: 'M3 işlemcili ultra ince, sessiz ve 18 saate varan pil ömürlü dizüstü bilgisayar.', original_price: 54999, stock: 18, image_url: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'İzmir Depo' } },
+  { id: '4', name: 'Sony PlayStation 5 Slim 1TB', description: 'Ultra yüksek hızlı SSD ve DualSense kablosuz kontrol cihazı ile 4K oyun keyfi.', original_price: 21999, stock: 30, image_url: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'İstanbul Ana Depo' } },
+  { id: '5', name: 'Samsung Galaxy S24 Ultra 512GB', description: 'Entegre S Pen, 200MP kamera ve Galaxy AI yapay zeka özellikleri.', original_price: 69999, stock: 25, image_url: 'https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'Bursa Lojistik Merkezi' } },
+  { id: '6', name: 'Apple Watch Ultra 2 Titanyum', description: 'Safir ön kristal, 100m su geçirmezlik ve 3000 nit ekran parlaklığı.', original_price: 36999, stock: 40, image_url: 'https://images.unsplash.com/photo-1546868871-7041f2a55e12?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'İstanbul Ana Depo' } },
+  { id: '7', name: 'Dell UltraSharp 32" 4K Monitör', description: 'IPS Black teknolojisi, Thunderbolt 4 bağlantı ve %98 DCI-P3 renk kalitesi.', original_price: 28500, stock: 15, image_url: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'Ankara Dağıtım Merkezi' } },
+  { id: '8', name: 'JBL Boombox 3 Bluetooth Hoparlör', description: 'Derin baslar, IP67 su ve toz geçirmezlik ve 24 saat kesintisiz çalma süresi.', original_price: 16999, stock: 55, image_url: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'İzmir Depo' } },
+  { id: '9', name: 'Sony Alpha A7 IV Kamera Body', description: '33MP tam kare sensör, 4K 60p video kaydı ve 759 odak noktalı oto-odaklama.', original_price: 89999, stock: 10, image_url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'Bursa Lojistik Merkezi' } },
+  { id: '10', name: 'DJI Mini 4 Pro Fly More Drone', description: '4K/60fps HDR video, engel algılama ve 34 dakika uçuş süresine sahip drone.', original_price: 42999, stock: 22, image_url: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?auto=format&fit=crop&w=800&q=80', warehouse: { name: 'İstanbul Ana Depo' } },
 ];
 
 const INITIAL_SALES_HISTORY = [

@@ -184,17 +184,22 @@ export default function Home() {
     // 3. Broadcast to all open tabs & clients
     broadcastRealtimeEvent({ type: 'STOCK_UPDATE', campaignId: camp.id, productId: camp.product_id, newStock });
 
+    const productName = camp.product?.name || camp.name || 'Flaş Ürün';
+    const origPrice = Number(camp.product?.original_price || camp.original_price || camp.price || 10000);
+    const discPercent = Number(camp.discount_percentage || 20);
+    const calculatedPrice = Math.round(origPrice * (1 - discPercent / 100));
+
     // 4. Add to cart
     dispatch(addToCart({
       campaignId: camp.id,
-      productId: camp.product_id,
-      name: camp.product.name,
-      price: camp.product.original_price * (1 - camp.discount_percentage / 100),
+      productId: camp.product_id || camp.id,
+      name: productName,
+      price: calculatedPrice,
       quantity: 1,
       stock: newStock
     }));
     setCartSuccessId(camp.id);
-    showToast(`✅ ${camp.product.name} sepete eklendi! Stok ${newStock} adede düştü.`, 'success');
+    showToast(`✅ ${productName} sepete eklendi! Stok ${newStock} adede düştü.`, 'success');
     setTimeout(() => setCartSuccessId(null), 2000);
   };
 
@@ -309,7 +314,12 @@ export default function Home() {
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} gap={6}>
             {activeCampaigns.map((camp, i) => {
               const idx = i % CARD_GRADIENTS.length;
-              const discountedPrice = camp.product.original_price * (1 - camp.discount_percentage / 100);
+              const prodName = camp.product?.name || camp.name || 'Özel Flaş Ürün';
+              const origPrice = Number(camp.product?.original_price || camp.original_price || camp.price || 10000);
+              const discPercent = Number(camp.discount_percentage || 20);
+              const discountedPrice = Math.round(origPrice * (1 - discPercent / 100));
+              const prodDesc = camp.product?.description || camp.description || 'Dağıtık Depo Flaş İndirim Fırsatı';
+              const imgUrl = camp.product?.image_url || camp.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80';
               const isOutOfStock = camp.campaign_stock <= 0;
               const isBuying = buyingId === camp.id;
               const isSuccess = successId === camp.id;
@@ -331,26 +341,26 @@ export default function Home() {
                   <Card.Body p={6}>
                     <Box borderRadius="2xl" overflow="hidden" h="200px" mb={4} border="1px solid" borderColor="whiteAlpha.100" bg="blackAlpha.300">
                       <img
-                        src={camp.product.image_url || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'}
-                        alt={camp.product.name}
+                        src={imgUrl}
+                        alt={prodName}
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </Box>
 
                     <HStack justify="space-between" mb={3}>
                       <Text fontSize="xs" color="whiteAlpha.500" fontWeight="600" textTransform="uppercase" letterSpacing="wider">
-                        {camp.product.description}
+                        {prodDesc}
                       </Text>
                       {!isOutOfStock && (
                         <Badge colorPalette={idx === 0 ? "purple" : idx === 1 ? "cyan" : idx === 2 ? "orange" : "emerald"} variant="solid" borderRadius="full" px={3} py={1} fontSize="xs" fontWeight="800">
-                          %{camp.discount_percentage} İNDİRİM
+                          %{discPercent} İNDİRİM
                         </Badge>
                       )}
                     </HStack>
 
                     <HStack justify="space-between" align="start" mb={4}>
                       <Card.Title color="white" fontSize="2xl" fontWeight="800">
-                        {camp.product.name}
+                        {prodName}
                       </Card.Title>
                       {user?.role === 'admin' && (
                         <Button size="xs" colorPalette="red" variant="subtle" onClick={() => handleDeleteCampaign(camp.id)}>
@@ -370,7 +380,7 @@ export default function Home() {
                         <Box textAlign="right">
                           <Text fontSize="xs" color="whiteAlpha.400" mb={1}>Normal Fiyat</Text>
                           <Text fontSize="md" color="whiteAlpha.400" textDecoration="line-through" fontWeight="500">
-                            ₺{camp.product.original_price.toLocaleString('tr-TR')}
+                            ₺{origPrice.toLocaleString('tr-TR')}
                           </Text>
                         </Box>
                       </HStack>
