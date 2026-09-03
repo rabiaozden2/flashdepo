@@ -172,6 +172,8 @@ const campaignSlice = createSlice({
             state.loading = false;
             if (action.payload && action.payload.length > 0) {
                 state.campaigns = action.payload;
+            } else if (!state.campaigns || state.campaigns.length === 0) {
+                state.campaigns = DEFAULT_CAMPAIGNS;
             }
         },
         fetchCampaignsFailure(state, action: PayloadAction<string>) {

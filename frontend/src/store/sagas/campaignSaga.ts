@@ -29,7 +29,11 @@ function* fetchCampaignsSaga(): Generator<any, void, any> {
         });
 
         const allCampaigns = Array.from(mergedMap.values());
-        yield put(fetchCampaignsSuccess(allCampaigns));
+        if (allCampaigns.length > 0) {
+            yield put(fetchCampaignsSuccess(allCampaigns));
+        } else {
+            yield put(fetchCampaignsSuccess([]));
+        }
     } catch (error: any) {
         yield put(fetchCampaignsFailure(error.message));
     }
