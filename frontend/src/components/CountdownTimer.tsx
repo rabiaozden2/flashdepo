@@ -29,8 +29,9 @@ function calculateTimeLeft(endTime: string): TimeLeft {
 }
 
 const TimeBlock = ({ value, label }: { value: number; label: string }) => (
-  <Box textAlign="center">
+  <Box textAlign="center" suppressHydrationWarning>
     <Box
+      suppressHydrationWarning
       style={{
         background: 'rgba(0,0,0,0.4)',
         border: '1px solid rgba(249,115,22,0.4)',
@@ -53,14 +54,34 @@ const TimeBlock = ({ value, label }: { value: number; label: string }) => (
 );
 
 export default function CountdownTimer({ endTime, mode = 'end' }: CountdownTimerProps) {
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft(endTime));
+  const [mounted, setMounted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
 
   useEffect(() => {
+    setMounted(true);
+    setTimeLeft(calculateTimeLeft(endTime));
     const interval = setInterval(() => {
       setTimeLeft(calculateTimeLeft(endTime));
     }, 1000);
     return () => clearInterval(interval);
   }, [endTime]);
+
+  if (!mounted) {
+    return (
+      <Box suppressHydrationWarning>
+        <Text fontSize="10px" color="rgba(249,115,22,0.7)" fontWeight="600" mb={1} textTransform="uppercase" letterSpacing="wider">
+          {mode === 'end' ? '⏱ Bitiş Süresi' : '⏱ Başlama Süresi'}
+        </Text>
+        <HStack gap={1}>
+          <TimeBlock value={0} label="Saat" />
+          <Text color="rgba(249,115,22,0.5)" fontWeight="800" fontSize="14px" mb={3}>:</Text>
+          <TimeBlock value={0} label="Dak" />
+          <Text color="rgba(249,115,22,0.5)" fontWeight="800" fontSize="14px" mb={3}>:</Text>
+          <TimeBlock value={0} label="Sn" />
+        </HStack>
+      </Box>
+    );
+  }
 
   if (timeLeft.expired) {
     return (
@@ -81,11 +102,11 @@ export default function CountdownTimer({ endTime, mode = 'end' }: CountdownTimer
   }
 
   return (
-    <Box>
+    <Box suppressHydrationWarning>
       <Text fontSize="10px" color="rgba(249,115,22,0.7)" fontWeight="600" mb={1} textTransform="uppercase" letterSpacing="wider">
         {mode === 'end' ? '⏱ Bitiş Süresi' : '⏱ Başlama Süresi'}
       </Text>
-      <HStack gap={1}>
+      <HStack gap={1} suppressHydrationWarning>
         {timeLeft.days > 0 && <TimeBlock value={timeLeft.days} label="Gün" />}
         <TimeBlock value={timeLeft.hours} label="Saat" />
         <Text color="rgba(249,115,22,0.5)" fontWeight="800" fontSize="14px" mb={3}>:</Text>
