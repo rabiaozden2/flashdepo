@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/store/store';
 import { useRouter } from 'next/navigation';
 import { showToast } from '@/components/Toast';
-import { fetchCampaignsStart } from '@/store/slices/campaignSlice';
+import { fetchCampaignsStart, addCampaign } from '@/store/slices/campaignSlice';
 import { FiBriefcase, FiPlus, FiMinus, FiPackage, FiZap, FiTag, FiShoppingBag, FiClock, FiCheckCircle, FiX } from 'react-icons/fi';
 import { broadcastRealtimeEvent, subscribeRealtimeEvents } from '@/utils/realtime';
 
